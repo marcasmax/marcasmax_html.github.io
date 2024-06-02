@@ -89,9 +89,39 @@
             text-align: left;
             cursor: pointer;
             transition: background-color 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .project-card:hover {
             background-color: #d0d0d0;
+        }
+        .add-project-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .add-project-form input, .add-project-form textarea {
+            margin: 10px 0;
+            padding: 10px;
+            width: 80%;
+            max-width: 500px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .add-project-form button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
         }
     </style>
     <script>
@@ -100,10 +130,76 @@
             if (user) {
                 document.getElementById('username').textContent = user;
                 document.getElementById('username').style.display = 'block';
+                document.getElementById('addProjectForm').style.display = 'flex';
+            } else {
+                document.getElementById('addProjectForm').style.display = 'none';
             }
         }
 
-        window.onload = checkLogin;
+        function addProject() {
+            var name = document.getElementById('projectName').value;
+            var description = document.getElementById('projectDescription').value;
+            var imageUrl = document.getElementById('projectImage').value;
+            var link1 = document.getElementById('projectLink1').value;
+            var link2 = document.getElementById('projectLink2').value;
+            var link3 = document.getElementById('projectLink3').value;
+
+            if (name === "") {
+                alert("El nombre del proyecto es obligatorio.");
+                return;
+            }
+
+            var projects = JSON.parse(localStorage.getItem('projects')) || [];
+            projects.push({
+                name: name,
+                description: description,
+                imageUrl: imageUrl,
+                link1: link1,
+                link2: link2,
+                link3: link3
+            });
+
+            localStorage.setItem('projects', JSON.stringify(projects));
+            displayProjects();
+        }
+
+        function displayProjects() {
+            var projects = JSON.parse(localStorage.getItem('projects')) || [];
+            var projectContainer = document.getElementById('projectContainer');
+            projectContainer.innerHTML = "";
+
+            projects.forEach(function(project, index) {
+                var projectCard = document.createElement('div');
+                projectCard.className = 'project-card';
+                projectCard.innerHTML = '<p>' + project.name + '</p>';
+                
+                var deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.onclick = function(event) {
+                    event.stopPropagation();
+                    deleteProject(index);
+                };
+
+                projectCard.onclick = function() {
+                    location.href = 'project.html?index=' + index;
+                };
+                projectCard.appendChild(deleteBtn);
+                projectContainer.appendChild(projectCard);
+            });
+        }
+
+        function deleteProject(index) {
+            var projects = JSON.parse(localStorage.getItem('projects')) || [];
+            projects.splice(index, 1);
+            localStorage.setItem('projects', JSON.stringify(projects));
+            displayProjects();
+        }
+
+        window.onload = function() {
+            checkLogin();
+            displayProjects();
+        };
     </script>
 </head>
 <body>
@@ -117,11 +213,17 @@
     </div>
     <div class="container">
         <h1>Proyectos</h1>
-        <a href="proyecto1.html">
-            <div class="project-card">
-                <p>Portada Proyecto Historia Colaborativo 3T 2P</p>
-            </div>
-        </a>
+        <div id="projectContainer"></div>
+        <div class="add-project-form" id="addProjectForm">
+            <h2>Agregar nuevo proyecto</h2>
+            <input type="text" id="projectName" placeholder="Nombre del proyecto">
+            <textarea id="projectDescription" placeholder="Descripción del proyecto"></textarea>
+            <input type="text" id="projectImage" placeholder="URL de la imagen (opcional)">
+            <input type="text" id="projectLink1" placeholder="Enlace 1 (opcional)">
+            <input type="text" id="projectLink2" placeholder="Enlace 2 (opcional)">
+            <input type="text" id="projectLink3" placeholder="Enlace 3 (opcional)">
+            <button onclick="addProject()">Agregar Proyecto</button>
+        </div>
     </div>
 </body>
 </html>
