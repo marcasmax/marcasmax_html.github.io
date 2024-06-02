@@ -99,9 +99,12 @@
 
         function login() {
             var user = prompt("Ingrese su nombre de usuario:");
-            if (user) {
+            var pass = prompt("Ingrese su contraseña:");
+            if (user === "marcasmax" && pass === "Marcasmax2011") {
                 localStorage.setItem('user', user);
                 checkLogin();
+            } else {
+                alert("Usuario o contraseña incorrectos");
             }
         }
 
