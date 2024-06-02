@@ -35,7 +35,7 @@
             background-color: #2196F3;
             color: white;
             border: none;
-            padding: 15px 32px;
+            padding: 10px 20px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -56,7 +56,7 @@
         }
         .nav {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             width: 100%;
             background-color: #fff;
             padding: 10px;
@@ -77,19 +77,46 @@
             color: #2196F3;
         }
         .nav .brand {
-            position: absolute;
-            left: 20px;
             font-size: 1.5em;
             color: #4CAF50;
             font-weight: bold;
         }
+        .nav .login {
+            font-size: 1.2em;
+            color: #2196F3;
+            cursor: pointer;
+        }
     </style>
+    <script>
+        function checkLogin() {
+            var user = localStorage.getItem('user');
+            if (user) {
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('username').textContent = user;
+                document.getElementById('username').style.display = 'block';
+            }
+        }
+
+        function login() {
+            var user = prompt("Ingrese su nombre de usuario:");
+            if (user) {
+                localStorage.setItem('user', user);
+                checkLogin();
+            }
+        }
+
+        window.onload = checkLogin;
+    </script>
 </head>
 <body>
     <div class="nav">
-        <div class="brand">MARCASMAX</div>
-        <a href="index.html">Inicio</a>
-        <a href="proyectos.html">Proyectos</a>
+        <div class="brand">MARCARSMAX</div>
+        <div>
+            <a href="index.html">Inicio</a>
+            <a href="proyectos.html">Proyectos</a>
+        </div>
+        <div class="login" id="loginButton" onclick="login()">Iniciar sesión</div>
+        <div class="login" id="username" style="display: none;"></div>
     </div>
     <div class="container">
         <h1>Bienvenido a MarcasMax</h1>
