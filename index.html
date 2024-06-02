@@ -94,6 +94,7 @@
                 document.getElementById('loginButton').style.display = 'none';
                 document.getElementById('username').textContent = user;
                 document.getElementById('username').style.display = 'block';
+                document.getElementById('logoutButton').style.display = 'block';
             }
         }
 
@@ -108,6 +109,13 @@
             }
         }
 
+        function logout() {
+            localStorage.removeItem('user');
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('username').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+
         window.onload = checkLogin;
     </script>
 </head>
@@ -120,6 +128,7 @@
         </div>
         <div class="login" id="loginButton" onclick="login()">Iniciar sesión</div>
         <div class="login" id="username" style="display: none;"></div>
+        <div class="login" id="logoutButton" onclick="logout()" style="display: none; color: red;">Cerrar sesión</div>
     </div>
     <div class="container">
         <h1>Bienvenido a MarcasMax</h1>
