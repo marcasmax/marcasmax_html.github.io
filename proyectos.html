@@ -81,11 +81,6 @@
             color: #4CAF50;
             font-weight: bold;
         }
-        .nav .login {
-            font-size: 1.2em;
-            color: #2196F3;
-            cursor: pointer;
-        }
         .project-card {
             background-color: #e0e0e0;
             padding: 15px;
@@ -103,20 +98,8 @@
         function checkLogin() {
             var user = localStorage.getItem('user');
             if (user) {
-                document.getElementById('loginButton').style.display = 'none';
                 document.getElementById('username').textContent = user;
                 document.getElementById('username').style.display = 'block';
-            }
-        }
-
-        function login() {
-            var user = prompt("Ingrese su nombre de usuario:");
-            var pass = prompt("Ingrese su contraseña:");
-            if (user === "marcasmax" && pass === "Marcasmax2011") {
-                localStorage.setItem('user', user);
-                checkLogin();
-            } else {
-                alert("Usuario o contraseña incorrectos");
             }
         }
 
@@ -130,7 +113,6 @@
             <a href="index.html">Inicio</a>
             <a href="proyectos.html">Proyectos</a>
         </div>
-        <div class="login" id="loginButton" onclick="login()">Iniciar sesión</div>
         <div class="login" id="username" style="display: none;"></div>
     </div>
     <div class="container">
