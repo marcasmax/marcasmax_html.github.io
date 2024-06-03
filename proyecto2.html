@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iglesias Barrocas de la Nueva España en México</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #555;
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+        a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 20px 10px;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            margin-top: 50px;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .nav a {
+            margin: 0 15px;
+            font-size: 1.2em;
+            color: #555;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .nav a:hover {
+            color: #2196F3;
+        }
+        .nav .brand {
+            font-size: 1.5em;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .nav .login {
+            font-size: 1.2em;
+            color: #2196F3;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function checkLogin() {
+            var user = localStorage.getItem('user');
+            if (user) {
+                document.getElementById('username').textContent = user;
+                document.getElementById('username').style.display = 'block';
+            }
+        }
+
+        window.onload = checkLogin;
+    </script>
+</head>
+<body>
+    <div class="nav">
+        <div class="brand">MARCARSMAX</div>
+        <div>
+            <a href="index.html">Inicio</a>
+            <a href="proyectos.html">Proyectos</a>
+        </div>
+        <div class="login" id="username" style="display: none;"></div>
+    </div>
+    <div class="container">
+        <h1>Iglesias Barrocas de la Nueva España en México</h1>
+        <p>Subido el 31/5/2024</p>
+        <p>Este archivo es utilizado para un propósito educativo no comercial será borrado el 30 de junio del 2024</p>
+        <p>Atribución: <a href="https://www.freepik.com/free-psd/world-book-day-template-design_38475967.htm#page=2&query=poster&position=39&from_view=keyword&track=sph&uuid=5c3e462a-0973-4f95-b36d-795c9fcfed97">Image by Freepik</a></p>
+        <div>
+            <a href="https://github.com/marcasmax/DOWNLOADSMARCASMAX/releases/download/ESCUELA/Iglesias.Barrocas.de.la.Nueva.Espana.en.Mexico.pdf">
+                <button>Descargar PDF</button>
+            </a>
+            <a href="https://github.com/marcasmax/DOWNLOADSMARCASMAX/releases/download/ESCUELA/Iglesias.Barrocas.de.la.Nueva.Espana.en.Mexico.docx">
+                <button>Descargar DOCX (Word)</button>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
