@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title style="color: black;">Escaneo Facial</title>
+<style>
+    #video-container {
+        position: relative;
+        width: 320px; /* Ancho deseado */
+        height: 240px; /* Alto deseado */
+        margin: 0 auto; /* Centrar */
+    }
+    #video {
+        width: 100%;
+        height: 100%;
+    }
+    #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        visibility: hidden;
+    }
+    #retry-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<h1 style="color: black;">Escaneo Facial</h1>
+<div>
+    <label for="camera-select" style="color: black;">Seleccionar cámara:</label>
+    <select id="camera-select" onchange="changeCamera()">
+    </select>
+</div>
+<div id="video-container">
+    <video id="video" autoplay playsinline></video>
+    <div id="overlay">
+        <div id="message">Escaneo Facial</div>
+        <button id="retry-button" style="display: none;" onclick="window.location.reload();">Reintentar</button>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const overlay = document.getElementById('overlay');
+    const message = document.getElementById('message');
+    const retryButton = document.getElementById('retry-button');
+    const cameraSelect = document.getElementById('camera-select');
+
+    let currentStream;
+
+    // Acceso a la cámara
+    async function setupCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => {
+                track.stop();
+            });
+        }
+
+        const constraints = {
+            video: {
+                facingMode: 'user' // Para la cámara frontal
+            }
+        };
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = stream;
+            currentStream = stream;
+            video.onloadedmetadata = () => {
+                video.play();
+                overlay.style.visibility = 'visible';
+            };
+            populateCameraList();
+        } catch (error) {
+            console.error('Error al acceder a la cámara:', error);
+        }
+    }
+
+    async function populateCameraList() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        cameraSelect.innerHTML = '';
+        videoDevices.forEach((device, index) => {
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.text = `Cámara ${index + 1}`;
+            cameraSelect.appendChild(option);
+        });
+    }
+
+    async function changeCamera() {
+        const deviceId = cameraSelect.value;
+        const constraints = {
+            video: {
+                deviceId: { exact: deviceId }
+            }
+        };
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = stream;
+            currentStream = stream;
+        } catch (error) {
+            console.error('Error al cambiar de cámara:', error);
+        }
+    }
+
+    // Captura de imagen y análisis facial
+    function captureImage() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        // Aquí puedes utilizar una biblioteca de análisis facial como face-api.js
+        // En este ejemplo simplemente simularemos el análisis facial
+        const hasFace = Math.random() > 0.5; // Simulación de detección de cara
+        return hasFace;
+    }
+
+    function startScan() {
+        overlay.style.visibility = 'hidden';
+        const hasFace = captureImage();
+        if (hasFace) {
+            message.textContent = 'Acceso Concedido';
+            setTimeout(() => {
+                window.location.href = 'otra_pagina.html';
+            }, 3000);
+        } else {
+            message.textContent = 'Intentelo de nuevo';
+            retryButton.style.display = 'block';
+        }
+    }
+
+    window.onload = setupCamera;
+</script>
+
+<button onclick="startScan()">Empezar</button>
+
+</body>
+</html>
