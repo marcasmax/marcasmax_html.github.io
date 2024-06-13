@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Página con Reloj y Reproductor de Video</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #000;
+        font-family: 'Montserrat', sans-serif;
+        color: #fff;
+        overflow-x: hidden;
+    }
+    .clock {
+        font-size: 10em;
+        text-align: center;
+        margin-top: 100px;
+    }
+    .timer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 2em;
+    }
+    .video-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+    #hideButton {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+        background-color: rgba(255,255,255,0.5);
+        color: #000;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    #discardButton {
+        display: none;
+        margin-top: 20px;
+    }
+    #todoButton {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1;
+        background-color: rgba(255,255,255,0.5);
+        color: #000;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    #todoList {
+        display: none;
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        background-color: rgba(255,255,255,0.5);
+        padding: 20px;
+        border-radius: 5px;
+    }
+</style>
+</head>
+<body>
+
+<div class="clock" id="clock">Loading...</div>
+
+<div class="timer">
+    <label for="timerInput">Minutos:</label>
+    <input type="number" id="timerInput" min="1" value="5">
+    <button onclick="startTimer()">Start</button>
+</div>
+
+<div class="video-container">
+    <iframe width="822" height="462" src="https://www.youtube.com/embed/N_yuPf1ITjE" title="Música para Directo Sin Copyright 2021🔥 | Lofi Chill Mix #1 🍃🎵 [1 Hora]" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+<button id="hideButton" onclick="toggleVideo()">Ocultar Video</button>
+<button id="discardButton" onclick="discardTimer()">Descartar</button>
+<button id="todoButton" onclick="toggleTodo()">To Do List</button>
+<div id="todoList">
+    <h2>To Do List</h2>
+    <ul id="todos">
+        <li contenteditable="true">Escribe tu tarea aquí...</li>
+    </ul>
+</div>
+
+<audio id="alarm" src="https://github.com/marcasmax/marcasmax_html.github.io/raw/main/alarm-clock-short-6402.mp3" preload="auto"></audio>
+
+<script>
+    var timer;
+    var alarmSound = document.getElementById('alarm');
+
+    function updateClock() {
+        var now = new Date();
+        var hours = now.getHours().toString().padStart(2, '0');
+        var minutes = now.getMinutes().toString().padStart(2, '0');
+        var seconds = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById("clock").textContent = hours + ":" + minutes + ":" + seconds;
+    }
+    
+    function startTimer() {
+        var minutes = parseInt(document.getElementById("timerInput").value);
+        var seconds = minutes * 60;
+        var display = document.querySelector('.timer');
+        clearInterval(timer);
+        timer = setInterval(function() {
+            var minutesLeft = Math.floor(seconds / 60);
+            var secondsLeft = seconds % 60;
+            display.textContent = minutesLeft + ':' + (secondsLeft < 10 ? '0' : '') + secondsLeft;
+            if (seconds > 0) {
+                seconds--;
+            } else {
+                clearInterval(timer);
+                display.innerHTML = '¡Tiempo finalizado! <button onclick="showOptions()">Volver a configurar</button>';
+                alarmSound.play();
+                document.getElementById("hideButton").style.display = "none";
+                document.getElementById("discardButton").style.display = "block";
+            }
+        }, 1000);
+    }
+    
+    function toggleVideo() {
+        var videoContainer = document.querySelector(".video-container");
+        var video = videoContainer.querySelector("iframe");
+
+        if (video.style.display === "none") {
+            video.style.display = "block";
+        } else {
+            video.style.display = "none";
+        }
+    }
+
+    function discardTimer() {
+        clearInterval(timer);
+        alarmSound.pause(); // Detener el sonido de la alarma
+        alarmSound.currentTime = 0; // Reiniciar el sonido al principio
+        document.getElementById("timerInput").value = "5"; // Restablecer el valor predeterminado del temporizador
+        document.querySelector('.timer').innerHTML = '<label for="timerInput">Minutos:</label><input type="number" id="timerInput" min="1" value="5"><button onclick="startTimer()">Start</button>';
+        document.getElementById("discardButton").style.display = "none";
+        document.getElementById("hideButton").style.display = "block";
+    }
+
+    function showOptions() {
+        document.querySelector('.timer').innerHTML = '<label for="timerInput">Minutos:</label><input type="number" id="timerInput" min="1" value="5"><button onclick="startTimer()">Start</button>';
+        document.getElementById("hideButton").style.display = "block";
+        document.getElementById("discardButton").style.display = "none";
+    }
+
+    function toggleTodo() {
+        var todoList = document.getElementById("todoList");
+        if (todoList.style.display === "none") {
+            todoList.style.display = "block";
+        } else {
+            todoList.style.display = "none";
+        }
+    }
+
+    setInterval(updateClock, 1000);
+</script>
+
+</body>
+</html>
