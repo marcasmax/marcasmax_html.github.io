@@ -1,0 +1,100 @@
+body {
+    font-family: 'Kanit', sans-serif; /* Usar la tipografía Kanit */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #001219; /* Color de fondo */
+    color: #ffffff;
+}
+
+#game {
+    text-align: center;
+    background-color: #005F73; /* Color del juego */
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 500px; /* Ampliar el ancho del juego */
+}
+
+h2 {
+    font-size: 24px; /* Tamaño de fuente más grande para los títulos */
+}
+
+button {
+    margin: 15px;
+    padding: 15px; /* Aumentar el padding para botones */
+    font-size: 18px; /* Aumentar tamaño de fuente de los botones */
+    cursor: pointer;
+    background-color: #0A9396; /* Color de botones */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #94D2BD; /* Color al pasar el mouse */
+}
+
+.reset-button {
+    position: absolute;
+    bottom: 20px; /* Ajustar posición para mayor espacio */
+    right: 15px; /* Ajustar posición para mayor espacio */
+}
+
+.progress-bar {
+    background-color: #E9D8A6; /* Color de la barra de progreso */
+    border-radius: 4px;
+    height: 15px; /* Aumentar la altura de la barra de progreso */
+    width: 100%;
+    margin-top: 15px; /* Ajustar margen superior */
+}
+
+#progress {
+    background-color: #EE9B00; /* Color del progreso */
+    height: 100%;
+    border-radius: 4px;
+}
+
+.back-button {
+    background-color: #CA6702; /* Color del botón regresar */
+    margin-top: 25px; /* Aumentar margen superior */
+    font-size: 18px; /* Aumentar tamaño de fuente del botón regresar */
+}
+
+#feedback {
+    margin-top: 15px; /* Aumentar margen superior */
+    font-weight: bold;
+    font-size: 20px; /* Aumentar tamaño de fuente para feedback */
+}
+
+/* Estilo para el cuadro de información */
+#info-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #005F73;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.info-content {
+    text-align: left;
+}
+
+.info-content h3 {
+    font-size: 24px; /* Tamaño de fuente para el título */
+}
+
+.info-content p {
+    font-size: 18px; /* Tamaño de fuente para el contenido */
+}
+
+.info-content button {
+    margin-top: 15px; /* Margen para el botón de cerrar */
+}

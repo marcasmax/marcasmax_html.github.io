@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Matemáticas</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game">
+        <!-- Pantalla de Selección de Grado -->
+        <div id="grade-selection">
+            <h2>Selecciona tu grado</h2>
+            <button onclick="startGame(3)">3er Grado</button>
+            <button onclick="startGame(4)">4to Grado</button>
+            <button onclick="startGame(5)">5to Grado</button>
+            <button onclick="startGame(6)">6to Grado</button>
+            <button id="info-button" onclick="showInfo()">i</button> <!-- Botón de información -->
+        </div>
+        
+        <!-- Menú del Nivel -->
+        <div id="level-menu" style="display: none;">
+            <h2>Nivel <span id="level"></span></h2>
+            <button onclick="loadGame()">Empezar</button>
+            <button onclick="resetProgress()" class="reset-button">Empezar desde Cero</button>
+        </div>
+        
+        <!-- Pantalla del Juego -->
+        <div id="game-screen" style="display: none;">
+            <h2>Nivel <span id="current-level"></span></h2>
+            <p id="question"></p>
+            <div id="options"></div>
+            <p id="feedback"></p>
+            <div class="progress-bar">
+                <div id="progress" style="width: 0%;"></div>
+            </div>
+            <button onclick="goBack()" class="back-button">Regresar al Inicio</button>
+            <button onclick="nextLevel()" id="next-level" style="display: none;">Siguiente Nivel</button>
+        </div>
+    </div>
+
+    <!-- Cuadro de Información -->
+    <div id="info-box" style="display: none;">
+        <div class="info-content">
+            <h3>Recursos Utilizados</h3>
+            <p><strong>Tipografía:</strong> Kanit <br>
+            Diseñada por Cadson Demak <br>
+            Copyright 2020 The Kanit Project Authors <br>
+            Licenciado bajo la SIL Open Font License, Versión 1.1</p>
+            <p><strong>Creado con ayuda de ChatGPT</strong> <br>
+            <strong>Creado por:</strong> Marcasmax</p>
+            <button onclick="closeInfo()">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
