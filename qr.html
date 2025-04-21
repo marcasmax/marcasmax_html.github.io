@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Códigos QR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/qrcode-generator"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        #qrcode {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background-color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-semibold text-center text-gray-800 mb-6">Generador de Códigos QR</h1>
+
+        <div id="tipo-qr" class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Seleccione el tipo de Código QR:</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <button data-tipo="texto" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Texto</button>
+                <button data-tipo="url" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">URL</button>
+                <button data-tipo="email" class="bg-yellow-500 hover:bg-yellow-700 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Email</button>
+                <button data-tipo="telefono" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Teléfono</button>
+                <button data-tipo="sms" class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">SMS</button>
+                <button data-tipo="wifi" class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Wi-Fi</button>
+                <button data-tipo="vcard" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">VCard</button>
+                <button data-tipo="redes-sociales" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Redes Sociales</button>
+                <button data-tipo="pago" class="bg-lime-500 hover:bg-lime-700 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Pago</button>
+            </div>
+        </div>
+
+        <div id="formulario-qr" class="hidden bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Formulario para generar Código QR</h2>
+            <form id="form-generar" class="space-y-4">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Generar Código QR</button>
+            </form>
+        </div>
+
+        <div id="qr-generado" class="hidden">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Código QR Generado:</h2>
+            <div class="qr-container">
+                <div id="qrcode"></div>
+            </div>
+            <div class="mt-4 text-center">
+                <button id="descargar-qr" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Descargar Código QR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const tipoQRDiv = document.getElementById('tipo-qr');
+    const formularioQRDiv = document.getElementById('formulario-qr');
+    const formGenerar = document.getElementById('form-generar');
+    const qrGeneradoDiv = document.getElementById('qr-generado');
+    const qrcodeDiv = document.getElementById('qrcode');
+    const descargarQRBtn = document.getElementById('descargar-qr');
+
+    let tipoQRSeleccionado = '';
+    let qrCodeInstance = null; // Para almacenar la instancia del código QR
+
+    tipoQRDiv.addEventListener('click', (event) => {
+        if (event.target.tagName === 'BUTTON') {
+            tipoQRSeleccionado = event.target.dataset.tipo;
+            formularioQRDiv.classList.remove('hidden');
+            qrGeneradoDiv.classList.add('hidden');
+            formGenerar.innerHTML = ''; // Limpiar el formulario anterior
+            generarFormulario(tipoQRSeleccionado);
+        }
+    });
+
+    formGenerar.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(formGenerar);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        generarQRCode(tipoQRSeleccionado, data);
+    });
+
+    descargarQRBtn.addEventListener('click', () => {
+        if (qrCodeInstance) {
+            const dataURL = qrcodeDiv.querySelector('canvas').toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = 'codigoqr.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } else {
+            alert('Primero genera un código QR.');
+        }
+    });
+
+    function generarFormulario(tipo) {
+        let camposHTML = '';
+        switch (tipo) {
+            case 'texto':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="texto" class="block text-gray-700 text-sm font-bold mb-2">Texto:</label>
+                        <textarea id="texto" name="texto" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                `;
+                break;
+            case 'url':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="url" class="block text-gray-700 text-sm font-bold mb-2">URL:</label>
+                        <input type="url" id="url" name="url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                `;
+                break;
+            case 'email':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                        <input type="email" id="email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="asunto" class="block text-gray-700 text-sm font-bold mb-2">Asunto:</label>
+                        <input type="text" id="asunto" name="asunto" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="cuerpo" class="block text-gray-700 text-sm font-bold mb-2">Cuerpo:</label>
+                        <textarea id="cuerpo" name="cuerpo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                `;
+                break;
+            case 'telefono':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="telefono" class="block text-gray-700 text-sm font-bold mb-2">Teléfono:</label>
+                        <input type="tel" id="telefono" name="telefono" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                `;
+                break;
+            case 'sms':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="sms_numero" class="block text-gray-700 text-sm font-bold mb-2">Número de Teléfono:</label>
+                        <input type="tel" id="sms_numero" name="sms_numero" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="sms_mensaje" class="block text-gray-700 text-sm font-bold mb-2">Mensaje:</label>
+                        <textarea id="sms_mensaje" name="sms_mensaje" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                `;
+                break;
+            case 'wifi':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="wifi_nombre" class="block text-gray-700 text-sm font-bold mb-2">Nombre de la Red (SSID):</label>
+                        <input type="text" id="wifi_nombre" name="wifi_nombre" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="wifi_contrasena" class="block text-gray-700 text-sm font-bold mb-2">Contraseña:</label>
+                        <input type="password" id="wifi_contrasena" name="wifi_contrasena" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="wifi_tipo" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Seguridad:</label>
+                        <select id="wifi_tipo" name="wifi_tipo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Sin Contraseña</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="wifi_oculto" class="block text-gray-700 text-sm font-bold mb-2">Red Oculta:</label>
+                        <input type="checkbox" id="wifi_oculto" name="wifi_oculto" class="mr-2">
+                    </div>
+                `;
+                break;
+            case 'vcard':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="vcard_nombre" class="block text-gray-700 text-sm font-bold mb-2">Nombre:</label>
+                        <input type="text" id="vcard_nombre" name="vcard_nombre" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="vcard_apellido" class="block text-gray-700 text-sm font-bold mb-2">Apellido:</label>
+                        <input type="text" id="vcard_apellido" name="vcard_apellido" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="vcard_telefono" class="block text-gray-700 text-sm font-bold mb-2">Teléfono:</label>
+                        <input type="tel" id="vcard_telefono" name="vcard_telefono" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="vcard_email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                        <input type="email" id="vcard_email" name="vcard_email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="vcard_organizacion" class="block text-gray-700 text-sm font-bold mb-2">Organización:</label>
+                        <input type="text" id="vcard_organizacion" name="vcard_organizacion" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="vcard_titulo" class="block text-gray-700 text-sm font-bold mb-2">Título:</label>
+                        <input type="text" id="vcard_titulo" name="vcard_titulo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="vcard_url" class="block text-gray-700 text-sm font-bold mb-2">URL:</label>
+                        <input type="url" id="vcard_url" name="vcard_url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="vcard_direccion" class="block text-gray-700 text-sm font-bold mb-2">Dirección:</label>
+                        <textarea id="vcard_direccion" name="vcard_direccion" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                `;
+                break;
+            case 'redes-sociales':
+                camposHTML += `
+                    <div class="mb-4">
+                        <label for="redsocial_tipo" class="block text-gray-700 text-sm font-bold mb-2">Red Social:</label>
+                        <select id="redsocial_tipo" name="redsocial_tipo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="facebook">Facebook</option>
+                            <option value="twitter">Twitter</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="github">GitHub</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="telegram">Telegram</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="redsocial_usuario" class="block text-gray-700 text-sm font-bold mb-2">Usuario o URL del Perfil:</label>
+                        <input type="text" id="redsocial_usuario" name="redsocial_usuario" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                `;
+                break;
+                case 'pago':
+                    camposHTML += `
+                        <div class="mb-4">
+                            <label for="pago_tipo" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Pago:</label>
+                            <select id="pago_tipo" name="pago_tipo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option value="paypal">PayPal</option>
+                                <option value="bitcoin">Bitcoin</option>
+                                <option value="ethereum">Ethereum</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="pago_destinatario" class="block text-gray-700 text-sm font-bold mb-2">Destinatario (Email, Dirección, etc.):</label>
+                            <input type="text" id="pago_destinatario" name="pago_destinatario" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="pago_monto" class="block text-gray-700 text-sm font-bold mb-2">Monto:</label>
+                            <input type="number" id="pago_monto" name="pago_monto" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" min="0" step="0.01">
+                        </div>
+                        <div class="mb-4">
+                            <label for="pago_moneda" class="block text-gray-700 text-sm font-bold mb-2">Moneda:</label>
+                            <input type="text" id="pago_moneda" name="pago_moneda" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="USD">
+                        </div>
+                        <div class="mb-4">
+                            <label for="pago_descripcion" class="block text-gray-700 text-sm font-bold mb-2">Descripción:</label>
+                            <textarea id="pago_descripcion" name="pago_descripcion" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                        </div>
+                    `;
+                    break;
+            default:
+                camposHTML = '<p>Tipo de QR no válido.</p>';
+        }
+        formGenerar.innerHTML = camposHTML;
+    }
+
+    function generarQRCode(tipo, data) {
+        let qrData = '';
+        switch (tipo) {
+            case 'texto':
+                qrData = data.texto;
+                break;
+            case 'url':
+                qrData = data.url;
+                break;
+            case 'email':
+                qrData = `mailto:${data.email}?subject=${encodeURIComponent(data.asunto)}&body=${encodeURIComponent(data.cuerpo)}`;
+                break;
+            case 'telefono':
+                qrData = `tel:${data.telefono}`;
+                break;
+            case 'sms':
+                qrData = `sms:${data.sms_numero}:${data.sms_mensaje}`;
+                break;
+            case 'wifi':
+                const ssid = data.wifi_nombre;
+                const password = data.wifi_contrasena;
+                const type = data.wifi_tipo;
+                const hidden = data.wifi_oculto ? 'true' : 'false';
+                qrData = `WIFI:S:${ssid};T:${type};P:${password};H:${hidden};;`;
+                break;
+            case 'vcard':
+                qrData = `BEGIN:VCARD
+VERSION:3.0
+N:${data.vcard_apellido};${data.vcard_nombre}
+FN:${data.vcard_nombre} ${data.vcard_apellido}
+TEL:${data.vcard_telefono}
+EMAIL:${data.vcard_email}
+ORG:${data.vcard_organizacion}
+TITLE:${data.vcard_titulo}
+URL:${data.vcard_url}
+ADR:${data.vcard_direccion}
+END:VCARD`;
+                break;
+            case 'redes-sociales':
+                let url = '';
+                switch (data.redsocial_tipo) {
+                    case 'facebook':
+                        url = `https://www.facebook.com/${data.redsocial_usuario}`;
+                        break;
+                    case 'twitter':
+                        url = `https://twitter.com/${data.redsocial_usuario}`;
+                        break;
+                    case 'instagram':
+                        url = `https://www.instagram.com/${data.redsocial_usuario}`;
+                        break;
+                    case 'youtube':
+                        url = `https://www.youtube.com/user/${data.redsocial_usuario}`;
+                        break;
+                    case 'linkedin':
+                        url = `https://www.linkedin.com/in/${data.redsocial_usuario}`;
+                        break;
+                    case 'github':
+                        url = `https://github.com/${data.redsocial_usuario}`;
+                        break;
+                    case 'whatsapp':
+                        url = `https://wa.me/${data.redsocial_usuario}`;
+                        break;
+                    case 'telegram':
+                        url = `https://t.me/${data.redsocial_usuario}`;
+                        break;
+                }
+                qrData = url;
+                break;
+            case 'pago':
+                  let pagoData = '';
+                  switch (data.pago_tipo) {
+                    case 'paypal':
+                      pagoData = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${data.pago_destinatario}&item_name=${encodeURIComponent(data.pago_descripcion)}&amount=${data.pago_monto}&currency_code=${data.pago_moneda}`;
+                      break;
+                    case 'bitcoin':
+                      pagoData = `bitcoin:${data.pago_destinatario}?amount=${data.pago_monto}`;
+                      break;
+                    case 'ethereum':
+                      pagoData = `ethereum:${data.pago_destinatario}?amount=${data.pago_monto}`;
+                      break;
+                    case 'otro':
+                      pagoData = `${data.pago_destinatario}`;
+                      break;
+                  }
+                  qrData = pagoData;
+                  break;
+            default:
+                qrData = '';
+        }
+
+        if (qrCodeInstance) {
+            qrCodeInstance.clear(); // Limpia el código QR anterior si existe
+            qrCodeInstance.makeCode(qrData); // Genera uno nuevo
+        } else {
+            qrCodeInstance = new QRCode(qrcodeDiv, { // Crea una nueva instancia si no existe
+                text: qrData,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        qrGeneradoDiv.classList.remove('hidden');
+    }
+    </script>
+</body>
+</html>
+
