@@ -14,13 +14,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            height: 100vh;
+            min-height: 100vh;
         }
         #botones-container {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
             width: 100%;
+            flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas pequeñas */
         }
         .boton {
             padding: 15px 30px;
@@ -31,7 +32,7 @@
             cursor: pointer;
             font-size: 18px;
             transition: background-color 0.3s ease;
-            margin: 0 15px;
+            margin: 10px; /* Aumentado el margen para pantallas pequeñas */
         }
         .boton:hover {
             background-color: #367c39;
@@ -69,6 +70,26 @@
             height: 70%;
             border: none;
             margin-top: 80px;
+        }
+
+        /* Media query para pantallas más pequeñas (móviles) */
+        @media screen and (max-width: 768px) {
+            #titulo-container {
+                font-size: 24px; /* Tamaño de fuente más pequeño en móviles */
+                padding: 15px 0;
+            }
+            .boton {
+                font-size: 16px; /* Tamaño de fuente más pequeño en botones en móviles */
+                padding: 10px 20px;
+                margin: 5px;
+            }
+            #foto-frame {
+                height: 60%; /* Altura más pequeña en móviles */
+                margin-top: 60px;
+            }
+            #botones-container {
+                flex-direction: column; /* Apila los botones en móviles */
+            }
         }
     </style>
 </head>
