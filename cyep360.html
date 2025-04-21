@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cascaditas y el Paraíso 360</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+        }
+        #botones-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .boton {
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            margin: 0 15px;
+        }
+        .boton:hover {
+            background-color: #367c39;
+        }
+        .boton:disabled {
+            background-color: #808080;
+            cursor: not-allowed;
+        }
+        #creditos-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        .creditos {
+            color: white;
+            font-size: 14px;
+            text-align: center;
+        }
+        #titulo-container {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 36px;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+            position: relative;
+        }
+        #foto-frame {
+            width: 100%;
+            height: 70%;
+            border: none;
+            margin-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div id="titulo-container">
+        Cascaditas y el Paraíso 360
+    </div>
+    <iframe id="foto-frame" src=""></iframe>
+    <div id="botones-container">
+        <button id="cascada-button" class="boton">Cascada</button>
+        <button id="paraiso-button" class="boton">Paraíso</button>
+    </div>
+    <div id="creditos-container">
+        <div id="creditos-paraiso" class="creditos">Créditos: Carlos Rojos (Paraíso)</div>
+    </div>
+    <script>
+        const cascadaButton = document.getElementById('cascada-button');
+        const paraisoButton = document.getElementById('paraiso-button');
+        const fotoFrame = document.getElementById('foto-frame');
+
+
+        const images = {
+            cascada: 'https://maps.app.goo.gl/brXpziGxUGDaTFy77?g_st=ac',
+            paraiso: 'https://maps.app.goo.gl/jzAWvAh6Rg17AeKE7?g_st=ac'
+        };
+
+        cascadaButton.addEventListener('click', () => {
+            window.open(images.cascada, '_blank');
+        });
+
+        paraisoButton.addEventListener('click', () => {
+            window.open(images.paraiso, '_blank');
+        });
+
+    </script>
+</body>
+</html>
+
