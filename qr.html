@@ -51,6 +51,7 @@
             <form id="form-generar" class="space-y-4">
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Generar Código QR</button>
             </form>
+            <button id="regresar-inicio-form" class="mt-4 text-blue-500 hover:text-blue-700 font-semibold focus:outline-none focus:shadow-outline">Regresar al inicio</button>
         </div>
 
         <div id="qr-generado" class="hidden">
@@ -58,8 +59,9 @@
             <div class="qr-container">
                 <div id="qrcode"></div>
             </div>
-            <div class="mt-4 text-center">
+            <div class="mt-4 text-center space-x-4">
                 <button id="descargar-qr" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Descargar Código QR</button>
+                <button id="regresar-inicio-qr" class="text-blue-500 hover:text-blue-700 font-semibold focus:outline-none focus:shadow-outline">Regresar al inicio</button>
             </div>
         </div>
     </div>
@@ -71,6 +73,8 @@
     const qrGeneradoDiv = document.getElementById('qr-generado');
     const qrcodeDiv = document.getElementById('qrcode');
     const descargarQRBtn = document.getElementById('descargar-qr');
+    const regresarInicioFormBtn = document.getElementById('regresar-inicio-form');
+    const regresarInicioQrBtn = document.getElementById('regresar-inicio-qr');
 
     let tipoQRSeleccionado = '';
     let qrCodeInstance = null; // Para almacenar la instancia del código QR
@@ -78,6 +82,8 @@
     tipoQRDiv.addEventListener('click', (event) => {
         if (event.target.tagName === 'BUTTON') {
             tipoQRSeleccionado = event.target.dataset.tipo;
+            // Ocultar opciones de tipo de QR
+            tipoQRDiv.classList.add('hidden');
             formularioQRDiv.classList.remove('hidden');
             qrGeneradoDiv.classList.add('hidden');
             formGenerar.innerHTML = ''; // Limpiar el formulario anterior
@@ -92,6 +98,7 @@
         for (let [key, value] of formData.entries()) {
             data[key] = value;
         }
+        formularioQRDiv.classList.add('hidden'); // Ocultar el formulario
         generarQRCode(tipoQRSeleccionado, data);
     });
 
@@ -106,6 +113,27 @@
             document.body.removeChild(a);
         } else {
             alert('Primero genera un código QR.');
+        }
+    });
+
+    regresarInicioFormBtn.addEventListener('click', () => {
+        // Mostrar opciones de tipo de QR y ocultar el formulario
+        tipoQRDiv.classList.remove('hidden');
+        formularioQRDiv.classList.add('hidden');
+        qrGeneradoDiv.classList.add('hidden');
+        formGenerar.innerHTML = '';
+    });
+
+    regresarInicioQrBtn.addEventListener('click', () => {
+        // Mostrar opciones de tipo de QR y ocultar el resultado del QR
+        tipoQRDiv.classList.remove('hidden');
+        formularioQRDiv.classList.add('hidden');
+        qrGeneradoDiv.classList.add('hidden');
+        formGenerar.innerHTML = '';
+        if (qrCodeInstance) {
+            qrCodeInstance.clear(); // Limpia el código QR generado
+            qrCodeInstance = null; // Resetea la instancia
+            qrcodeDiv.innerHTML = ''; // Limpia el contenedor del código QR
         }
     });
 
@@ -224,27 +252,27 @@
                     </div>
                 `;
                 break;
-            case 'redes-sociales':
-                camposHTML += `
-                    <div class="mb-4">
-                        <label for="redsocial_tipo" class="block text-gray-700 text-sm font-bold mb-2">Red Social:</label>
-                        <select id="redsocial_tipo" name="redsocial_tipo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="facebook">Facebook</option>
-                            <option value="twitter">Twitter</option>
-                            <option value="instagram">Instagram</option>
-                            <option value="youtube">YouTube</option>
-                            <option value="linkedin">LinkedIn</option>
-                            <option value="github">GitHub</option>
-                            <option value="whatsapp">WhatsApp</option>
-                            <option value="telegram">Telegram</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label for="redsocial_usuario" class="block text-gray-700 text-sm font-bold mb-2">Usuario o URL del Perfil:</label>
-                        <input type="text" id="redsocial_usuario" name="redsocial_usuario" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-                `;
-                break;
+                case 'redes-sociales':
+                    camposHTML += `
+                        <div class="mb-4">
+                            <label for="redsocial_tipo" class="block text-gray-700 text-sm font-bold mb-2">Red Social:</label>
+                            <select id="redsocial_tipo" name="redsocial_tipo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option value="facebook">Facebook</option>
+                                <option value="twitter">Twitter</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="github">GitHub</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="telegram">Telegram</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="redsocial_usuario" class="block text-gray-700 text-sm font-bold mb-2">Usuario o URL del Perfil:</label>
+                            <input type="text" id="redsocial_usuario" name="redsocial_usuario" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                    `;
+                    break;
                 case 'pago':
                     camposHTML += `
                         <div class="mb-4">
@@ -282,31 +310,31 @@
 
     function generarQRCode(tipo, data) {
         let qrData = '';
-        switch (tipo) {
-            case 'texto':
-                qrData = data.texto;
-                break;
-            case 'url':
-                qrData = data.url;
-                break;
-            case 'email':
-                qrData = `mailto:${data.email}?subject=${encodeURIComponent(data.asunto)}&body=${encodeURIComponent(data.cuerpo)}`;
-                break;
-            case 'telefono':
-                qrData = `tel:${data.telefono}`;
-                break;
-            case 'sms':
-                qrData = `sms:${data.sms_numero}:${data.sms_mensaje}`;
-                break;
-            case 'wifi':
-                const ssid = data.wifi_nombre;
-                const password = data.wifi_contrasena;
-                const type = data.wifi_tipo;
-                const hidden = data.wifi_oculto ? 'true' : 'false';
-                qrData = `WIFI:S:${ssid};T:${type};P:${password};H:${hidden};;`;
-                break;
-            case 'vcard':
-                qrData = `BEGIN:VCARD
+            switch (tipo) {
+                case 'texto':
+                    qrData = data.texto;
+                    break;
+                case 'url':
+                    qrData = data.url;
+                    break;
+                case 'email':
+                  qrData = `mailto:${data.email}?subject=${encodeURIComponent(data.asunto)}&body=${encodeURIComponent(data.cuerpo)}`;
+                  break;
+                case 'telefono':
+                    qrData = `tel:${data.telefono}`;
+                    break;
+                case 'sms':
+                    qrData = `sms:${data.sms_numero}:${data.sms_mensaje}`;
+                    break;
+                case 'wifi':
+                    const ssid = data.wifi_nombre;
+                    const password = data.wifi_contrasena;
+                    const type = data.wifi_tipo;
+                    const hidden = data.wifi_oculto ? 'true' : 'false';
+                    qrData = `WIFI:S:${ssid};T:${type};P:${password};H:${hidden};;`;
+                    break;
+                case 'vcard':
+                    qrData = `BEGIN:VCARD
 VERSION:3.0
 N:${data.vcard_apellido};${data.vcard_nombre}
 FN:${data.vcard_nombre} ${data.vcard_apellido}
@@ -317,58 +345,58 @@ TITLE:${data.vcard_titulo}
 URL:${data.vcard_url}
 ADR:${data.vcard_direccion}
 END:VCARD`;
-                break;
-            case 'redes-sociales':
-                let url = '';
-                switch (data.redsocial_tipo) {
-                    case 'facebook':
-                        url = `https://www.facebook.com/${data.redsocial_usuario}`;
-                        break;
-                    case 'twitter':
-                        url = `https://twitter.com/${data.redsocial_usuario}`;
-                        break;
-                    case 'instagram':
-                        url = `https://www.instagram.com/${data.redsocial_usuario}`;
-                        break;
-                    case 'youtube':
-                        url = `https://www.youtube.com/user/${data.redsocial_usuario}`;
-                        break;
-                    case 'linkedin':
-                        url = `https://www.linkedin.com/in/${data.redsocial_usuario}`;
-                        break;
-                    case 'github':
-                        url = `https://github.com/${data.redsocial_usuario}`;
-                        break;
-                    case 'whatsapp':
-                        url = `https://wa.me/${data.redsocial_usuario}`;
-                        break;
-                    case 'telegram':
-                        url = `https://t.me/${data.redsocial_usuario}`;
-                        break;
-                }
-                qrData = url;
-                break;
-            case 'pago':
-                  let pagoData = '';
-                  switch (data.pago_tipo) {
-                    case 'paypal':
-                      pagoData = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${data.pago_destinatario}&item_name=${encodeURIComponent(data.pago_descripcion)}&amount=${data.pago_monto}&currency_code=${data.pago_moneda}`;
+                    break;
+                case 'redes-sociales':
+                    let url = '';
+                    switch (data.redsocial_tipo) {
+                        case 'facebook':
+                            url = `https://www.facebook.com/${data.redsocial_usuario}`;
+                            break;
+                        case 'twitter':
+                            url = `https://twitter.com/${data.redsocial_usuario}`;
+                            break;
+                        case 'instagram':
+                            url = `https://www.instagram.com/${data.redsocial_usuario}`;
+                            break;
+                        case 'youtube':
+                            url = `https://www.youtube.com/user/${data.redsocial_usuario}`;
+                            break;
+                        case 'linkedin':
+                            url = `https://www.linkedin.com/in/${data.redsocial_usuario}`;
+                            break;
+                        case 'github':
+                            url = `https://github.com/${data.redsocial_usuario}`;
+                            break;
+                        case 'whatsapp':
+                            url = `https://wa.me/${data.redsocial_usuario}`;
+                            break;
+                        case 'telegram':
+                            url = `https://t.me/${data.redsocial_usuario}`;
+                            break;
+                    }
+                    qrData = url;
+                    break;
+                case 'pago':
+                      let pagoData = '';
+                      switch (data.pago_tipo) {
+                        case 'paypal':
+                          pagoData = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${data.pago_destinatario}&item_name=${encodeURIComponent(data.pago_descripcion)}&amount=${data.pago_monto}&currency_code=${data.pago_moneda}`;
+                          break;
+                        case 'bitcoin':
+                          pagoData = `bitcoin:${data.pago_destinatario}?amount=${data.pago_monto}`;
+                          break;
+                        case 'ethereum':
+                          pagoData = `ethereum:${data.pago_destinatario}?amount=${data.pago_monto}`;
+                          break;
+                        case 'otro':
+                          pagoData = `${data.pago_destinatario}`;
+                          break;
+                      }
+                      qrData = pagoData;
                       break;
-                    case 'bitcoin':
-                      pagoData = `bitcoin:${data.pago_destinatario}?amount=${data.pago_monto}`;
-                      break;
-                    case 'ethereum':
-                      pagoData = `ethereum:${data.pago_destinatario}?amount=${data.pago_monto}`;
-                      break;
-                    case 'otro':
-                      pagoData = `${data.pago_destinatario}`;
-                      break;
-                  }
-                  qrData = pagoData;
-                  break;
-            default:
-                qrData = '';
-        }
+                default:
+                    qrData = '';
+            }
 
         if (qrCodeInstance) {
             qrCodeInstance.clear(); // Limpia el código QR anterior si existe
@@ -380,10 +408,9 @@ END:VCARD`;
                 height: 256,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-correctLevel: QRCode.CorrectLevel.H
+                correctLevel: QRCode.CorrectLevel.H
             });
         }
-
         qrGeneradoDiv.classList.remove('hidden');
     }
     </script>
