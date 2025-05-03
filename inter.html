@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intercomunicador Web</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px; /* Más estrecho para móviles */
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px; /* Espacio entre contenedores */
+        }
+        h1 {
+            font-size: 20px; /* Tamaño de fuente más pequeño para móviles */
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 14px; /* Tamaño de fuente más pequeño para móviles */
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px; /* Tamaño de fuente más pequeño para móviles */
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        #startButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #startButton:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #talkButton {
+            background-color: #008CBA;
+            color: white;
+            margin-top: 10px;
+        }
+        #listenButton {
+            background-color: #e65100;
+            color: white;
+            margin-top: 10px;
+        }
+        #stopButton {
+            background-color: #f44336;
+            color: white;
+            margin-top: 10px;
+        }
+        audio {
+            margin-top: 10px;
+            width: 100%; /* Asegura que el control de audio no se desborde */
+        }
+        #myAudio {
+            display: none; /* Oculta el reproductor de audio */
+        }
+        .warning {
+            color: red;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        @media (min-width: 600px) {
+            .container {
+                width: 50%; /* Vuelve al ancho original en pantallas más grandes */
+                max-width: 400px;
+            }
+            h1 {
+                font-size: 24px; /* Tamaño de fuente normal en pantallas grandes */
+            }
+            p {
+                font-size: 16px; /* Tamaño de fuente normal en pantallas grandes */
+            }
+            button {
+                font-size: 16px; /* Tamaño de fuente normal en pantallas grandes */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="sender">
+        <h1>Intercomunicador - Emisor (Teléfono 1)</h1>
+        <p>Enlace a este teléfono:</p>
+        <p id="senderLink">Cargando...</p>
+        <button id="startButton">Iniciar Transmisión</button>
+        <p id="senderStatus">Transmisión inactiva</p>
+        <audio id="myAudio" controls></audio> <br>
+         <p class="warning">Asegúrate de que ambos teléfonos estén en la misma red Wi-Fi o conectados por datos móviles.</p>
+    </div>
+
+    <div class="container" id="receiver">
+        <h1>Intercomunicador - Receptor (Teléfono 2)</h1>
+        <p>Enlace a este teléfono:</p>
+        <p id="receiverLink">Cargando...</p>
+        <button id="listenButton">Escuchar Emisor</button>
+        <button id="talkButton" disabled>Hablar y Escuchar</button>
+        <button id="stopButton" disabled>Detener</button>
+        <p id="receiverStatus">Recepción inactiva</p>
+        <audio id="remoteAudio" controls></audio>
+         <p class="warning">Asegúrate de que ambos teléfonos estén en la misma red Wi-Fi o conectados por datos móviles.</p>
+    </div>
+
+    <script>
+        // Configuración de Simple Peer (asumiendo que se incluye la librería)
+        const peer = new Peer();
+        let localStream;
+        let remoteStream;
+        let senderConn;
+        let receiverConn;
+        let isListening = false;
+        let isTalking = false;
+
+        const senderStatus = document.getElementById('senderStatus');
+        const receiverStatus = document.getElementById('receiverStatus');
+        const startButton = document.getElementById('startButton');
+        const listenButton = document.getElementById('listenButton');
+        const talkButton = document.getElementById('talkButton');
+        const stopButton = document.getElementById('stopButton');
+        const myAudio = document.getElementById('myAudio');  // Para previsualizar el micrófono del emisor
+        const remoteAudio = document.getElementById('remoteAudio');
+
+        // Obtener la dirección IP local (simulado para navegadores)
+        function getLocalAddress() {
+            return window.location.href;
+        }
+
+        // Mostrar enlaces (simulados)
+        document.getElementById('senderLink').textContent = getLocalAddress();
+        document.getElementById('receiverLink').textContent = getLocalAddress();
+
+        // Función para iniciar la transmisión del micrófono (Emisor - Teléfono 1)
+        async function startStream() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                //  myAudio.srcObject = localStream; // Esto es para que el *EMISOR* escuche su propio micrófono
+                senderStatus.textContent = 'Transmitiendo audio...';
+                startButton.disabled = true;
+
+                 if (receiverConn) {
+                    localStream.getTracks().forEach(track => {
+                        receiverConn.peerConnection.addTrack(track, localStream);
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error al obtener el micrófono:', error);
+                senderStatus.textContent = 'Error al iniciar la transmisión: ' + error.message;
+            }
+        }
+
+        // Función para iniciar la escucha (Receptor - Teléfono 2)
+        function startListening() {
+             isListening = true;
+             listenButton.disabled = false; // El botón de escuchar SIEMPRE debe estar activo
+             talkButton.disabled = false;
+             stopButton.disabled = true; // El botón de detener NO debe estar habilitado al inicio
+             receiverStatus.textContent = 'Escuchando...';
+
+              // Establecer conexión con el emisor
+            receiverConn = peer.connect(peer.id); // Conectar al mismo ID
+
+            receiverConn.on('stream', stream => {
+                remoteAudio.srcObject = stream;
+                remoteAudio.play();
+            });
+
+             receiverConn.on('data', data => {
+                if (data.type === 'audio-offer') {
+                    handleAudioOffer(data.offer);
+                } else if (data.type === 'audio-answer') {
+                    handleAudioAnswer(data.answer);
+                } else if (data.type === 'candidate') {
+                    receiverConn.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            });
+
+            receiverConn.on('connect', () => {
+                console.log("Connected to Sender");
+                 if (localStream) {
+                    localStream.getTracks().forEach(track => {
+                       receiverConn.peerConnection.addTrack(track, localStream);
+                    });
+                }
+            });
+
+             // Configuración de WebRTC para recibir audio
+            receiverConn.peerConnection.ontrack = (event) => {
+                remoteAudio.srcObject = event.streams[0];
+                remoteAudio.play().catch(e => console.error("Error playing stream:", e));
+                receiverStatus.textContent = 'Recibiendo audio...';
+            };
+        }
+
+
+
+        // Función para hablar y escuchar (Receptor - Teléfono 2)
+        function startTalking() {
+            if (!isListening) {
+                startListening(); // Asegurarse de que la conexión esté establecida
+            }
+            isTalking = true;
+            listenButton.disabled = true;
+            talkButton.disabled = true;
+            stopButton.disabled = false;
+            receiverStatus.textContent = 'Hablando y Escuchando...';
+
+            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+            .then(micStream => {
+                localStream = micStream;
+                 if (receiverConn) {
+                    localStream.getTracks().forEach(track => {
+                         receiverConn.peerConnection.addTrack(track, localStream);
+                    });
+                 }
+
+                // Enviar el stream de audio al emisor
+                receiverConn.on('stream', stream => {
+                    remoteAudio.srcObject = stream;
+                    remoteAudio.play();
+                });
+
+            })
+            .catch(err=>{
+                console.error("Error al obtener el microfono", err);
+            })
+        }
+
+        // Función para detener la comunicación (Receptor - Teléfono 2)
+        function stopTalking() {
+            isTalking = false;
+            listenButton.disabled = false;
+            talkButton.disabled = false;
+            stopButton.disabled = true;
+            receiverStatus.textContent = 'Recepción detenida.';
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    track.stop();
+                    if (receiverConn) {
+                       receiverConn.peerConnection.removeTrack(track);
+                    }
+
+                });
+                localStream = null;
+            }
+            remoteAudio.srcObject = null;
+        }
+
+        // Eventos de los botones
+        startButton.addEventListener('click', startStream);
+        listenButton.addEventListener('click', startListening);
+        talkButton.addEventListener('click', startTalking);
+        stopButton.addEventListener('click', stopTalking);
+
+        // Manejar conexiones PeerJS
+        peer.on('connection', conn => {
+            if (!senderConn) {
+                senderConn = conn;
+                senderConn.on('open', () => {
+                    senderStatus.textContent = 'Conectado al receptor!';
+                    startButton.disabled = false; // Habilitar el botón de inicio en el emisor
+                });
+
+                senderConn.on('data', data => {
+                    console.log("Data received at sender", data);
+                })
+
+                conn.on('stream', stream => {
+                    console.log("Stream received at sender", stream);
+                })
+
+            }
+        });
+
+        peer.on('open', id => {
+            console.log('Mi ID de Peer es:', id);
+        });
+
+        peer.on('error', err => {
+            console.error('Error de PeerJS:', err);
+        });
+    </script>
+</body>
+</html>
+
