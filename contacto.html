@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Contacto</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for social media icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom font import (Inter, similar to Apple's San Francisco) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f2f2f7; /* iOS background color */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better scrolling on mobile */
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .ios-card-container {
+            max-width: 450px; /* Slightly wider for iOS feel */
+            width: 100%;
+            background-color: transparent; /* Container itself is transparent */
+            padding-top: 20px; /* Space from top */
+        }
+        .profile-section {
+            background-color: #ffffff;
+            border-radius: 1.25rem; /* Rounded corners for the entire profile block */
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem; /* Space below profile section */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+        .profile-pic {
+            width: 90px; /* Smaller image */
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 2px solid #f0f0f0; /* Lighter border */
+        }
+        .section-group {
+            background-color: #ffffff;
+            border-radius: 1.25rem; /* Rounded corners for grouped sections */
+            margin-bottom: 1.5rem;
+            overflow: hidden; /* Ensures rounded corners clip content */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+        .section-title {
+            font-size: 0.9rem;
+            color: #6d6d72; /* iOS gray text */
+            text-align: left;
+            padding: 0.5rem 1.25rem; /* Padding for section title */
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.25rem;
+            border-bottom: 1px solid #e5e5ea; /* iOS separator line */
+            color: #000000;
+            text-decoration: none;
+            transition: background-color 0.2s ease-in-out;
+            text-align: left; /* Align text to left */
+        }
+        .list-item:last-child {
+            border-bottom: none; /* No border for the last item */
+        }
+        .list-item:active { /* iOS-like tap effect */
+            background-color: #e0e0e5;
+        }
+        .list-item i {
+            width: 28px; /* Fixed width for icons */
+            text-align: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: #8e8e93; /* Default icon color */
+        }
+        .list-item span {
+            flex-grow: 1;
+            font-size: 1.05rem;
+            color: #000000; /* Default text color */
+        }
+        .list-item .value {
+            color: #8e8e93; /* Value text color */
+            font-weight: 400;
+        }
+        .list-item.link-item .value {
+            color: #007AFF; /* iOS blue for links */
+        }
+
+        /* Specific icon colors for social media */
+        .list-item.instagram i { color: #833AB4; }
+        .list-item.whatsapp i { color: #25D366; }
+        .list-item.apple i { color: #000000; }
+        .list-item.snapchat i { color: #FFFC00; }
+        .list-item.tiktok i { color: #000000; }
+        .list-item.github i { color: #333333; }
+        .list-item.phone i { color: #007AFF; } /* Phone icon in iOS blue */
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            body {
+                padding: 15px;
+            }
+            .profile-section {
+                padding: 1rem;
+                border-radius: 1rem;
+                margin-bottom: 1rem;
+            }
+            .profile-pic {
+                width: 80px;
+                height: 80px;
+            }
+            .section-group {
+                border-radius: 1rem;
+                margin-bottom: 1rem;
+            }
+            .list-item {
+                padding: 0.8rem 1rem;
+                font-size: 0.95rem;
+            }
+            .list-item i {
+                font-size: 1.1rem;
+                margin-right: 0.8rem;
+            }
+            .section-title {
+                padding: 0.4rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-card-container">
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <img src="https://placehold.co/90x90/E0E0E0/333333?text=Tu+Foto" alt="Foto de Perfil" class="profile-pic">
+            <h1 class="text-2xl font-semibold text-gray-800 mb-1">Maximiliano Martínez Castillo</h1>
+            <!-- Removed: <p class="text-md text-gray-500">Tu Título/Profesión (Opcional)</p> -->
+        </div>
+
+        <!-- Contact Info Section -->
+        <div class="section-title">CONTACTO</div>
+        <div class="section-group">
+            <a href="tel:4443363646" class="list-item phone">
+                <i class="fas fa-phone-alt"></i>
+                <span>Teléfono</span>
+                <span class="value">(444) 336-3646</span>
+            </a>
+            <!-- Removed: Mail Link
+            <a href="mailto:tu_correo@example.com" class="list-item apple link-item">
+                <i class="fas fa-envelope"></i>
+                <span>Correo Electrónico</span>
+                <span class="value">tu_correo@example.com</span>
+            </a>
+            -->
+        </div>
+
+        <!-- Social Media Section -->
+        <div class="section-title">REDES SOCIALES</div>
+        <div class="section-group">
+            <a href="https://www.instagram.com/max.mtzt/" target="_blank" class="list-item instagram link-item">
+                <i class="fab fa-instagram"></i>
+                <span>Instagram</span>
+                <span class="value">@max.mtzt</span>
+            </a>
+            <a href="https://wa.me/4443363646" target="_blank" class="list-item whatsapp link-item">
+                <i class="fab fa-whatsapp"></i>
+                <span>WhatsApp</span>
+                <span class="value">+52 (444) 336-3646</span>
+            </a>
+            <a href="mailto:marcas.max@icloud.com" target="_blank" class="list-item apple link-item">
+                <i class="fab fa-apple"></i>
+                <span>Apple (Correo/FaceTime)</span>
+                <span class="value">marcas.max@icloud.com</span>
+            </a>
+            <a href="https://www.snapchat.com/add/max.mtzt" target="_blank" class="list-item snapchat link-item">
+                <i class="fab fa-snapchat-ghost"></i>
+                <span>Snapchat</span>
+                <span class="value">max.mtzt</span>
+            </a>
+            <a href="https://www.tiktok.com/@max.mtzt" target="_blank" class="list-item tiktok link-item">
+                <i class="fab fa-tiktok"></i>
+                <span>TikTok</span>
+                <span class="value">@max.mtzt</span>
+            </a>
+            <a href="https://github.com/marcasmax" target="_blank" class="list-item github link-item">
+                <i class="fab fa-github"></i>
+                <span>GitHub</span>
+                <span class="value">marcasmax</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+
