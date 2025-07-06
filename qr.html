@@ -99,7 +99,6 @@
         const claveCrear = document.getElementById('clave-crear');
         const btnGenerar = document.getElementById('btn-generar');
         const contenedorQR = document.getElementById('contenedor-qr');
-        let qrcode = null; // Para mantener la instancia del QR
 
         // --- Lógica del Modal ---
         const modalMensaje = document.getElementById('modal-mensaje');
@@ -124,21 +123,15 @@
                 return;
             }
 
-            // 1. Codificar el texto con la clave
-            const textoCodificado = xorEncode(texto, clave);
-            // 2. Convertir a Base64 para asegurar compatibilidad en el QR
-            const dataParaQR = btoa(textoCodificado);
-
             // Limpiar QR anterior
             contenedorQR.innerHTML = '';
             
-            // Crear el nuevo elemento div para el QR
+            // --- Generación para la VISTA PREVIA (negro sobre blanco) ---
             const qrElement = document.createElement('div');
             contenedorQR.appendChild(qrElement);
 
-            // Generar el código QR
-            qrcode = new QRCode(qrElement, {
-                text: dataParaQR,
+            new QRCode(qrElement, {
+                text: btoa(xorEncode(texto, clave)),
                 width: 256,
                 height: 256,
                 colorDark: "#000000",
@@ -146,18 +139,62 @@
                 correctLevel: QRCode.CorrectLevel.H
             });
             
-            // Crear botón de descarga
-            setTimeout(() => {
-                const qrImg = qrElement.querySelector('img');
-                if (qrImg) {
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = qrImg.src;
-                    downloadLink.download = 'codigo_qr_codificado.png';
-                    downloadLink.textContent = 'Descargar QR';
-                    downloadLink.className = 'mt-4 bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition';
-                    contenedorQR.appendChild(downloadLink);
-                }
-            }, 100); // Pequeña espera para que la imagen se renderice
+            // --- Botón de Descarga (genera QR blanco sobre transparente) ---
+            const downloadButton = document.createElement('button');
+            downloadButton.textContent = 'Descargar QR (Fondo Transparente)';
+            downloadButton.className = 'mt-4 bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition';
+            contenedorQR.appendChild(downloadButton);
+
+            downloadButton.addEventListener('click', () => {
+                // 1. Obtener los datos para el QR
+                const dataParaQR = btoa(xorEncode(textoOriginal.value, claveCrear.value));
+
+                // 2. Crear un contenedor temporal y oculto para el nuevo QR
+                const tempDiv = document.createElement('div');
+                tempDiv.style.visibility = 'hidden';
+                tempDiv.style.position = 'absolute';
+                document.body.appendChild(tempDiv);
+
+                // 3. Generar el QR blanco sobre fondo negro en el contenedor temporal
+                new QRCode(tempDiv, {
+                    text: dataParaQR,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#FFFFFF",   // QR blanco
+                    colorLight: "#000000",  // Fondo negro (que haremos transparente)
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                // 4. Procesar el canvas para hacer el fondo transparente
+                setTimeout(() => {
+                    const canvas = tempDiv.querySelector('canvas');
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const data = imageData.data;
+                        // Iterar sobre todos los píxeles
+                        for (let i = 0; i < data.length; i += 4) {
+                            // Si el píxel es negro (nuestro fondo)
+                            if (data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0) {
+                                // Cambiar su alpha a 0 (transparente)
+                                data[i + 3] = 0;
+                            }
+                        }
+                        ctx.putImageData(imageData, 0, 0);
+
+                        // 5. Activar la descarga
+                        const link = document.createElement('a');
+                        link.download = 'codigo_qr_transparente.png';
+                        link.href = canvas.toDataURL('image/png');
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+
+                    // 6. Limpiar el div temporal
+                    document.body.removeChild(tempDiv);
+                }, 200); // Espera para asegurar que el canvas se haya renderizado
+            });
         });
     </script>
 
