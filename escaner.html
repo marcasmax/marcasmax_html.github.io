@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner de QR Codificado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #reader__dashboard_section_csr button {
+            background-color: #4f46e5 !important;
+            color: white !important;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        /* Estilos del Modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-md">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-green-600">Escáner de QR Codificado</h1>
+            <p class="mt-2 text-gray-600">Usa la contraseña correcta para ver el contenido.</p>
+        </header>
+
+        <!-- Sección de Escaneo de QR -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center border-b pb-2">Escanear y Decodificar</h2>
+
+            <div class="space-y-4">
+                 <div>
+                    <label for="clave-escanear" class="block mb-2 font-medium text-gray-700">Contraseña secreta:</label>
+                    <input type="password" id="clave-escanear" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" placeholder="Ingresa la clave del QR">
+                </div>
+                
+                <button id="btn-iniciar-escaner" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-transform transform hover:scale-105">
+                    Iniciar Escáner
+                </button>
+
+                <div id="reader" class="w-full rounded-lg overflow-hidden border-2 border-dashed border-gray-300 bg-gray-50" style="display: none;"></div>
+
+                <div id="resultado-contenedor" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200" style="display: none;">
+                    <h3 class="font-semibold text-lg mb-2">Información Decodificada:</h3>
+                    <p id="resultado-texto" class="text-gray-700 whitespace-pre-wrap break-words"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mensajes -->
+    <div id="modal-mensaje" class="modal-backdrop" style="display: none;">
+        <div class="modal-content">
+            <p id="modal-texto" class="text-lg mb-4"></p>
+            <button id="modal-cerrar" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Lógica de Decodificación ---
+        /**
+         * Decodifica un texto usando un cifrado XOR simple con una clave.
+         * @param {string} text - El texto a procesar.
+         * @param {string} key - La clave para el cifrado.
+         * @returns {string} El texto procesado.
+         */
+        function xorDecode(text, key) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                result += String.fromCharCode(charCode);
+            }
+            return result;
+        }
+
+        // --- Lógica del Modal ---
+        const modalMensaje = document.getElementById('modal-mensaje');
+        const modalTexto = document.getElementById('modal-texto');
+        const modalCerrar = document.getElementById('modal-cerrar');
+
+        function mostrarModal(mensaje) {
+            modalTexto.textContent = mensaje;
+            modalMensaje.style.display = 'flex';
+        }
+        modalCerrar.addEventListener('click', () => {
+            modalMensaje.style.display = 'none';
+        });
+
+        // --- Escáner de QR ---
+        const claveEscanear = document.getElementById('clave-escanear');
+        const btnIniciarEscaner = document.getElementById('btn-iniciar-escaner');
+        const readerDiv = document.getElementById('reader');
+        const resultadoContenedor = document.getElementById('resultado-contenedor');
+        const resultadoTexto = document.getElementById('resultado-texto');
+        let html5QrCode = null;
+
+        btnIniciarEscaner.addEventListener('click', () => {
+            const clave = claveEscanear.value;
+            if (!clave) {
+                mostrarModal('Por favor, ingresa la contraseña para poder decodificar el QR.');
+                return;
+            }
+            
+            readerDiv.style.display = 'block';
+            resultadoContenedor.style.display = 'none';
+
+            // Si ya existe una instancia, la detenemos antes de crear una nueva
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(err => console.error("Fallo al detener el scanner.", err));
+            }
+            html5QrCode = new Html5Qrcode("reader");
+
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                html5QrCode.stop().then(() => {
+                    readerDiv.style.display = 'none';
+                    readerDiv.innerHTML = ''; // Limpiar el contenido del lector
+                    try {
+                        // 1. Decodificar de Base64
+                        const textoCodificado = atob(decodedText);
+                        // 2. Decodificar con la clave XOR
+                        const textoFinal = xorDecode(textoCodificado, clave);
+                        
+                        resultadoTexto.textContent = textoFinal;
+                        resultadoContenedor.style.display = 'block';
+
+                    } catch (error) {
+                        console.error("Error al decodificar:", error);
+                        resultadoTexto.textContent = "Error: La contraseña es incorrecta o este no es un código QR válido para esta aplicación.";
+                        resultadoContenedor.style.display = 'block';
+                    }
+                }).catch(err => {
+                    console.error("No se pudo detener el escáner.", err);
+                });
+            };
+
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            // Iniciar la cámara
+             html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+                 .catch(err => {
+                     mostrarModal("Error al iniciar la cámara. Asegúrate de dar permisos para acceder a ella.");
+                     console.error("No se pudo iniciar el escáner", err);
+                     readerDiv.style.display = 'none';
+                 });
+        });
+    </script>
+
+</body>
+</html>
