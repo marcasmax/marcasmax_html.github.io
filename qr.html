@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador y Escáner de QR Codificado</title>
+    <title>Creador de QR Codificado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        #reader__dashboard_section_csr button {
-            background-color: #4f46e5 !important;
-            color: white !important;
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-         /* Modal styles */
+        /* Estilos del Modal */
         .modal-backdrop {
             position: fixed;
             top: 0;
@@ -42,64 +35,37 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-md">
         <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600">Creador y Escáner de QR Codificado</h1>
-            <p class="mt-2 text-gray-600">Crea códigos QR que solo esta aplicación puede leer.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600">Creador de QR Codificado</h1>
+            <p class="mt-2 text-gray-600">Crea códigos QR seguros con una contraseña.</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-            <!-- Sección de Creación de QR -->
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4 text-center border-b pb-2">1. Crear QR Codificado</h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label for="texto-original" class="block mb-2 font-medium text-gray-700">Información a codificar:</label>
-                        <textarea id="texto-original" rows="4" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Escribe tu nota, fecha o cualquier información..."></textarea>
-                    </div>
-
-                    <div>
-                        <label for="clave-crear" class="block mb-2 font-medium text-gray-700">Contraseña secreta:</label>
-                        <input type="password" id="clave-crear" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Clave para proteger tu información">
-                    </div>
-
-                    <button id="btn-generar" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
-                        Generar Código QR
-                    </button>
+        <!-- Sección de Creación de QR -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center border-b pb-2">Crear QR</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="texto-original" class="block mb-2 font-medium text-gray-700">Información a codificar:</label>
+                    <textarea id="texto-original" rows="4" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Escribe tu nota, fecha o cualquier información..."></textarea>
                 </div>
 
-                <div id="contenedor-qr" class="mt-6 flex flex-col items-center justify-center space-y-4">
-                    <!-- El QR se mostrará aquí -->
+                <div>
+                    <label for="clave-crear" class="block mb-2 font-medium text-gray-700">Contraseña secreta:</label>
+                    <input type="password" id="clave-crear" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Clave para proteger tu información">
                 </div>
+
+                <button id="btn-generar" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                    Generar Código QR
+                </button>
             </div>
 
-            <!-- Sección de Escaneo de QR -->
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4 text-center border-b pb-2">2. Escanear y Decodificar</h2>
-
-                <div class="space-y-4">
-                     <div>
-                        <label for="clave-escanear" class="block mb-2 font-medium text-gray-700">Contraseña secreta:</label>
-                        <input type="password" id="clave-escanear" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Ingresa la clave del QR">
-                    </div>
-                    
-                    <button id="btn-iniciar-escaner" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-transform transform hover:scale-105">
-                        Iniciar Escáner
-                    </button>
-
-                    <div id="reader" class="w-full rounded-lg overflow-hidden border-2 border-dashed border-gray-300 bg-gray-50" style="display: none;"></div>
-
-                    <div id="resultado-contenedor" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200" style="display: none;">
-                        <h3 class="font-semibold text-lg mb-2">Información Decodificada:</h3>
-                        <p id="resultado-texto" class="text-gray-700 whitespace-pre-wrap break-words"></p>
-                    </div>
-                </div>
+            <div id="contenedor-qr" class="mt-6 flex flex-col items-center justify-center space-y-4">
+                <!-- El QR se mostrará aquí -->
             </div>
-
         </div>
     </div>
 
@@ -111,17 +77,15 @@
         </div>
     </div>
 
-
     <script>
-        // --- Lógica de Codificación / Decodificación ---
-
+        // --- Lógica de Codificación ---
         /**
-         * Codifica o decodifica un texto usando un cifrado XOR simple con una clave.
+         * Codifica un texto usando un cifrado XOR simple con una clave.
          * @param {string} text - El texto a procesar.
          * @param {string} key - La clave para el cifrado.
          * @returns {string} El texto procesado.
          */
-        function xorEncodeDecode(text, key) {
+        function xorEncode(text, key) {
             let result = '';
             for (let i = 0; i < text.length; i++) {
                 const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
@@ -131,7 +95,6 @@
         }
 
         // --- Lógica de la interfaz de usuario ---
-        
         const textoOriginal = document.getElementById('texto-original');
         const claveCrear = document.getElementById('clave-crear');
         const btnGenerar = document.getElementById('btn-generar');
@@ -162,7 +125,7 @@
             }
 
             // 1. Codificar el texto con la clave
-            const textoCodificado = xorEncodeDecode(texto, clave);
+            const textoCodificado = xorEncode(texto, clave);
             // 2. Convertir a Base64 para asegurar compatibilidad en el QR
             const dataParaQR = btoa(textoCodificado);
 
@@ -196,59 +159,6 @@
                 }
             }, 100); // Pequeña espera para que la imagen se renderice
         });
-
-        // --- Escáner de QR ---
-        const claveEscanear = document.getElementById('clave-escanear');
-        const btnIniciarEscaner = document.getElementById('btn-iniciar-escaner');
-        const readerDiv = document.getElementById('reader');
-        const resultadoContenedor = document.getElementById('resultado-contenedor');
-        const resultadoTexto = document.getElementById('resultado-texto');
-        let html5QrcodeScanner = null;
-
-        btnIniciarEscaner.addEventListener('click', () => {
-            const clave = claveEscanear.value;
-            if (!clave) {
-                mostrarModal('Por favor, ingresa la contraseña para poder decodificar el QR.');
-                return;
-            }
-            
-            readerDiv.style.display = 'block';
-            resultadoContenedor.style.display = 'none';
-
-            const html5QrCode = new Html5Qrcode("reader");
-
-            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                html5QrCode.stop().then(() => {
-                    readerDiv.style.display = 'none';
-                    try {
-                        // 1. Decodificar de Base64
-                        const textoCodificado = atob(decodedText);
-                        // 2. Decodificar con la clave XOR
-                        const textoFinal = xorEncodeDecode(textoCodificado, clave);
-                        
-                        resultadoTexto.textContent = textoFinal;
-                        resultadoContenedor.style.display = 'block';
-
-                    } catch (error) {
-                        console.error("Error al decodificar:", error);
-                        resultadoTexto.textContent = "Error: La contraseña es incorrecta o este no es un código QR válido para esta aplicación.";
-                        resultadoContenedor.style.display = 'block';
-                    }
-                }).catch(err => {
-                    console.error("No se pudo detener el escáner.", err);
-                });
-            };
-
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
-            // Iniciar la cámara
-             html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-                .catch(err => {
-                    mostrarModal("Error al iniciar la cámara. Asegúrate de dar permisos para acceder a ella.");
-                    console.error("No se pudo iniciar el escáner", err);
-                });
-        });
-
     </script>
 
 </body>
