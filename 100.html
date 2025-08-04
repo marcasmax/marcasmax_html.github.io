@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Mexicanos Dijeron - Arduino Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos generales del cuerpo y contenedor principal */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Fondo oscuro */
+            color: #e2e8f0; /* Texto claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Evita barras de desplazamiento */
+        }
+        .game-container {
+            width: 95%; /* Ancho fluido */
+            max-width: 1200px; /* Ancho máximo para pantallas grandes */
+            height: 90vh; /* Altura fluida */
+            background-color: #2d3748; /* Fondo oscuro ligeramente más claro */
+            border-radius: 1.5rem; /* Esquinas redondeadas */
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Estilos para las pantallas del juego */
+        .screen {
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+        .screen.active {
+            display: flex; /* La pantalla activa se muestra */
+        }
+        /* Estilos para los botones */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #63b3ed; /* Azul */
+            color: #1a202c;
+        }
+        .btn-primary:hover {
+            background-color: #4299e1;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background-color: #fc8181; /* Rojo */
+            color: #1a202c;
+        }
+        .btn-danger:hover {
+            background-color: #e53e3e;
+            transform: translateY(-2px);
+        }
+        /* Estilos para campos de entrada */
+        input[type="text"], input[type="file"] {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4a5568;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+            width: 80%;
+            max-width: 400px;
+        }
+        /* Estilos para las cajas de respuesta */
+        .answer-box {
+            background-color: #4a5568;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 0.5rem;
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+        .answer-box.revealed {
+            background-color: #63b3ed; /* Azul cuando se revela */
+        }
+        .answer-text {
+            flex-grow: 1;
+            text-align: left;
+        }
+        .answer-points {
+            margin-left: 1rem;
+            color: #cbd5e0;
+        }
+        /* Estilos para los strikes (X's) */
+        .strike-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .strike-x {
+            font-size: 3rem;
+            color: #e53e3e; /* X roja */
+            font-weight: bold;
+            opacity: 0.3; /* Desvanecido inicialmente */
+            transition: opacity 0.3s ease;
+        }
+        .strike-x.active {
+            opacity: 1; /* Completamente visible cuando está activo */
+        }
+        /* Estilos para la puntuación actual de la ronda */
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #a0aec0;
+        }
+        /* Estilos para los paneles de puntuación de los equipos */
+        .team-score-panel {
+            background-color: #4a5568;
+            border-radius: 1rem;
+            padding: 1rem;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%; /* Ocupa toda la altura del padre */
+        }
+        .team-score-panel h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .team-score-panel .score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #a0aec0;
+        }
+        /* Área de la pregunta y respuestas */
+        .question-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .question-text {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #cbd5e0;
+        }
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Una columna para móvil */
+            gap: 1rem;
+            width: 100%;
+            max-width: 900px;
+            justify-items: center;
+        }
+
+        /* Media query para dos columnas en tablet/escritorio */
+        @media (min-width: 768px) {
+            .answers-grid {
+                grid-template-columns: 1fr 1fr; /* Dos columnas */
+            }
+        }
+        /* Layout de la pantalla de preguntas */
+        .question-screen-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 1rem;
+        }
+        /* Estilos específicos para la pantalla del buzzer */
+        .buzzer-screen h1 {
+            font-size: 4rem;
+            color: #63b3ed;
+            animation: pulse 1.5s infinite alternate; /* Animación de pulso */
+        }
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.7; }
+            to { transform: scale(1.05); opacity: 1; }
+        }
+        /* Estilos específicos para la pantalla del ganador */
+        .winner-screen h1 {
+            font-size: 3.5rem;
+            color: #48bb78; /* Verde para el ganador */
+            margin-bottom: 1rem;
+        }
+        .winner-screen p {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .winner-screen .final-scores {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .winner-screen .final-score-item {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        /* Estilos para el modal personalizado (alertas/confirmaciones) */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7); /* Fondo semi-transparente */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+        .modal-content p {
+            margin-bottom: 1.5rem;
+            color: #cbd5e0;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Pantalla de Conexión -->
+        <div id="connect-screen" class="screen active">
+            <h1 class="text-4xl font-bold mb-8 text-blue-400">100 Mexicanos Dijeron</h1>
+            <p class="text-lg mb-4">¡Conecta tu Arduino para empezar!</p>
+            <button id="connect-arduino-btn" class="btn btn-primary">Conectar Arduino</button>
+            <p id="connection-status" class="mt-4 text-gray-400"></p>
+            <p class="text-lg mt-8 mb-4">Carga el archivo de preguntas (.txt):</p>
+            <input type="file" id="questions-file-input" accept=".txt" class="mb-4">
+            <button id="load-file-btn" class="btn btn-primary" disabled>Cargar Preguntas</button>
+            <p id="file-status" class="mt-4 text-gray-400"></p>
+        </div>
+
+        <!-- Pantalla de Nombres de Equipos -->
+        <div id="team-names-screen" class="screen">
+            <h1 class="text-4xl font-bold mb-8 text-blue-400">Nombres de los Equipos</h1>
+            <div class="flex flex-col items-center mb-6 w-full">
+                <label for="team1-name" class="text-lg mb-2">Nombre Equipo 1:</label>
+                <input type="text" id="team1-name" placeholder="Ej: Los Ganadores" class="w-80">
+            </div>
+            <div class="flex flex-col items-center mb-6 w-full">
+                <label for="team2-name" class="text-lg mb-2">Nombre Equipo 2:</label>
+                <input type="text" id="team2-name" placeholder="Ej: Los Invencibles" class="w-80">
+            </div>
+            <button id="start-game-btn" class="btn btn-primary">Empezar Juego</button>
+        </div>
+
+        <!-- Pantalla de Buzzer -->
+        <div id="buzzer-screen" class="screen">
+            <h1 class="text-6xl font-bold text-blue-400 animate-pulse">¡A Buzzer!</h1>
+            <p class="text-2xl mt-4">El primer equipo en presionar su botón contesta.</p>
+        </div>
+
+        <!-- Pantalla de Preguntas -->
+        <div id="question-screen" class="screen">
+            <div class="score-display">Puntos Acumulados: <span id="current-round-score">0</span></div>
+            <div class="question-screen-layout">
+                <div id="team1-panel" class="team-score-panel">
+                    <h3 id="team1-name-display">Equipo 1</h3>
+                    <div class="score" id="team1-score">0</div>
+                    <div class="strike-container" id="team1-strikes">
+                        <span class="strike-x" data-strike-index="0">X</span>
+                        <span class="strike-x" data-strike-index="1">X</span>
+                        <span class="strike-x" data-strike-index="2">X</span>
+                    </div>
+                </div>
+
+                <div class="question-area">
+                    <p id="question-text" class="question-text">¿Pregunta de ejemplo?</p>
+                    <div id="answers-grid" class="answers-grid">
+                        <!-- Las cajas de respuesta se añadirán dinámicamente aquí -->
+                    </div>
+                </div>
+
+                <div id="team2-panel" class="team-score-panel">
+                    <h3 id="team2-name-display">Equipo 2</h3>
+                    <div class="score" id="team2-score">0</div>
+                    <div class="strike-container" id="team2-strikes">
+                        <span class="strike-x" data-strike-index="0">X</span>
+                        <span class="strike-x" data-strike-index="1">X</span>
+                        <span class="strike-x" data-strike-index="2">X</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Siguiente Ronda -->
+        <div id="next-round-screen" class="screen">
+            <h1 class="text-4xl font-bold mb-8 text-blue-400">Fin de la Ronda <span id="round-number-display">1</span></h1>
+            <p class="text-2xl mb-4">Las respuestas correctas eran:</p>
+            <div id="revealed-answers-summary" class="answers-grid mb-8">
+                <!-- Las respuestas reveladas se mostrarán aquí -->
+            </div>
+            <button id="continue-game-btn" class="btn btn-primary">Siguiente Ronda</button>
+        </div>
+
+        <!-- Pantalla de Ganador -->
+        <div id="winner-screen" class="screen">
+            <h1 class="text-green-500">¡Felicidades, <span id="winner-name"></span>!</h1>
+            <p>¡Has ganado el juego!</p>
+            <div class="final-scores">
+                <div class="final-score-item"><span id="final-team1-name"></span>: <span id="final-team1-score"></span> puntos</div>
+                <div class="final-score-item"><span id="final-team2-name"></span>: <span id="final-team2-score"></span> puntos</div>
+            </div>
+            <button id="play-again-btn" class="btn btn-primary mt-8">Jugar de Nuevo</button>
+        </div>
+    </div>
+
+    <!-- Modal personalizado para Alertas/Confirmaciones -->
+    <div id="custom-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <p id="modal-message"></p>
+            <div class="modal-buttons">
+                <button id="modal-ok-btn" class="btn btn-primary">OK</button>
+                <button id="modal-cancel-btn" class="btn btn-danger" style="display: none;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Variables Globales ---
+        let port; // Objeto del puerto serial web
+        let reader; // Lector para datos entrantes
+        let inputDone; // Promesa para cuando el lector termine
+        let outputDone; // Promesa para cuando el escritor termine
+        let outputStream; // Escritor para datos salientes
+
+        const BAUD_RATE = 9600; // Debe coincidir con Serial.begin() de Arduino
+
+        // Referencias a las diferentes pantallas del juego
+        const screens = {
+            connect: document.getElementById('connect-screen'),
+            teamNames: document.getElementById('team-names-screen'),
+            buzzer: document.getElementById('buzzer-screen'),
+            question: document.getElementById('question-screen'),
+            nextRound: document.getElementById('next-round-screen'),
+            winner: document.getElementById('winner-screen')
+        };
+
+        // Estado del juego
+        let gameState = {
+            currentRound: 0, // 0-2 para 3 rondas
+            team1: { name: "Equipo 1", score: 0, strikes: 0, buzzedIn: false },
+            team2: { name: "Equipo 2", score: 0, strikes: 0, buzzedIn: false },
+            questions: [], // Preguntas parseadas del archivo
+            currentQuestionIndex: -1, // Índice de la pregunta actual
+            currentQuestionData: null, // Datos de la pregunta actual
+            revealedAnswers: [], // Array de booleanos para las respuestas reveladas de la pregunta actual
+            buzzerWinner: null, // 'team1' o 'team2'
+            currentRoundScore: 0 // Puntos acumulados en la pregunta actual
+        };
+
+        // Mapeo de comandos de botones de Arduino a acciones del juego y LEDs
+        const buttonMap = {
+            'BTN1_PRESS': { action: 'buzzer1_uncover1', led: 'LED1_ON' },
+            'BTN2_PRESS': { action: 'buzzer2_uncover2', led: 'LED2_ON' },
+            'BTN3_PRESS': { action: 'uncover3' },
+            'BTN4_PRESS': { action: 'uncover4' },
+            'BTN5_PRESS': { action: 'uncover5' }
+            // BTN6_PRESS ha sido eliminado, ahora se usa la rueda del ratón para strikes
+        };
+
+        // --- Elementos del DOM ---
+        const connectArduinoBtn = document.getElementById('connect-arduino-btn');
+        const connectionStatus = document.getElementById('connection-status');
+        const questionsFileInput = document.getElementById('questions-file-input');
+        const loadFileBtn = document.getElementById('load-file-btn');
+        const fileStatus = document.getElementById('file-status');
+        const team1NameInput = document.getElementById('team1-name');
+        const team2NameInput = document.getElementById('team2-name');
+        const startGameBtn = document.getElementById('start-game-btn');
+
+        const currentRoundScoreDisplay = document.getElementById('current-round-score');
+        const questionTextDisplay = document.getElementById('question-text');
+        const answersGrid = document.getElementById('answers-grid');
+        const team1NameDisplay = document.getElementById('team1-name-display');
+        const team2NameDisplay = document.getElementById('team2-name-display');
+        const team1ScoreDisplay = document.getElementById('team1-score');
+        const team2ScoreDisplay = document.getElementById('team2-score');
+        const team1StrikesContainer = document.getElementById('team1-strikes');
+        const team2StrikesContainer = document.getElementById('team2-strikes');
+
+        const roundNumberDisplay = document.getElementById('round-number-display');
+        const revealedAnswersSummary = document.getElementById('revealed-answers-summary');
+        const continueGameBtn = document.getElementById('continue-game-btn');
+
+        const winnerNameDisplay = document.getElementById('winner-name');
+        const finalTeam1NameDisplay = document.getElementById('final-team1-name');
+        const finalTeam1ScoreDisplay = document.getElementById('final-team1-score');
+        const finalTeam2NameDisplay = document.getElementById('final-team2-name');
+        const finalTeam2ScoreDisplay = document.getElementById('final-team2-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Elementos del modal personalizado
+        const customModal = document.getElementById('custom-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalOkBtn = document.getElementById('modal-ok-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+        // --- Funciones de Utilidad ---
+        /**
+         * Muestra una pantalla específica del juego y oculta las demás.
+         * @param {string} screenName - El nombre de la pantalla a mostrar (ej. 'connect', 'buzzer').
+         */
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        /**
+         * Muestra un modal personalizado para alertas o confirmaciones.
+         * @param {string} title - El título del modal.
+         * @param {string} message - El mensaje a mostrar en el modal.
+         * @param {boolean} [isConfirm=false] - Si es true, muestra un botón de cancelar para confirmación.
+         * @returns {Promise<boolean>} Resuelve a true si se presiona OK, false si se presiona Cancelar.
+         */
+        function showModal(title, message, isConfirm = false) {
+            return new Promise(resolve => {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalOkBtn.onclick = () => {
+                    customModal.style.display = 'none';
+                    resolve(true);
+                };
+                if (isConfirm) {
+                    modalCancelBtn.style.display = 'inline-block';
+                    modalCancelBtn.onclick = () => {
+                        customModal.style.display = 'none';
+                        resolve(false);
+                    };
+                } else {
+                    modalCancelBtn.style.display = 'none';
+                }
+                customModal.style.display = 'flex';
+            });
+        }
+
+        // --- Funciones de la Web Serial API ---
+        /**
+         * Intenta conectar con un dispositivo Arduino a través de la Web Serial API.
+         */
+        async function connectArduino() {
+            if ('serial' in navigator) {
+                try {
+                    // Solicita al usuario que seleccione un puerto serial
+                    port = await navigator.serial.requestPort();
+                    // Abre el puerto con la velocidad de baudios especificada
+                    await port.open({ baudRate: BAUD_RATE });
+                    connectionStatus.textContent = 'Conectado a Arduino.';
+                    connectionStatus.classList.remove('text-gray-400', 'text-red-400');
+                    connectionStatus.classList.add('text-green-400');
+                    loadFileBtn.disabled = false; // Habilita el botón de cargar archivo
+                    readSerialData(); // Comienza a leer datos del Arduino
+                } catch (error) {
+                    console.error('Error al conectar a Arduino:', error);
+                    connectionStatus.textContent = `Error: ${error.message}`;
+                    connectionStatus.classList.remove('text-gray-400', 'text-green-400');
+                    connectionStatus.classList.add('text-red-400');
+                    showModal('Error de Conexión', `No se pudo conectar a Arduino: ${error.message}`);
+                }
+            } else {
+                connectionStatus.textContent = 'Tu navegador no soporta la Web Serial API. Usa Chrome.';
+                connectionStatus.classList.remove('text-gray-400', 'text-green-400');
+                connectionStatus.classList.add('text-red-400');
+                showModal('Navegador No Compatible', 'Tu navegador no soporta la Web Serial API. Por favor, usa Google Chrome (versión 89 o superior) para esta funcionalidad.');
+            }
+        }
+
+        /**
+         * Lee continuamente los datos entrantes del puerto serial de Arduino.
+         */
+        async function readSerialData() {
+            while (port.readable) {
+                reader = port.readable.getReader();
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) {
+                            // Permite que el puerto serial se cierre más tarde.
+                            reader.releaseLock();
+                            break;
+                        }
+                        if (value) {
+                            const textDecoder = new TextDecoder();
+                            const incomingData = textDecoder.decode(value).trim();
+                            console.log('Datos recibidos de Arduino:', incomingData);
+                            handleArduinoInput(incomingData); // Procesa el comando recibido
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error al leer datos seriales:', error);
+                    connectionStatus.textContent = `Error de lectura: ${error.message}`;
+                    connectionStatus.classList.remove('text-green-400');
+                    connectionStatus.classList.add('text-red-400');
+                    showModal('Error de Lectura Serial', `Hubo un error al leer datos de Arduino: ${error.message}`);
+                } finally {
+                    reader.releaseLock();
+                }
+            }
+        }
+
+        /**
+         * Envía datos (comandos) al puerto serial de Arduino.
+         * @param {string} data - El string a enviar a Arduino.
+         */
+        async function sendSerialData(data) {
+            if (!port || !port.writable) {
+                console.warn('Puerto serial no disponible para escritura.');
+                return;
+            }
+            const textEncoder = new TextEncoder();
+            const writer = port.writable.getWriter();
+            try {
+                // Añade un salto de línea para que Arduino pueda leer la cadena completa
+                await writer.write(textEncoder.encode(data + '\n'));
+                console.log('Datos enviados a Arduino:', data);
+            } catch (error) {
+                console.error('Error al escribir datos seriales:', error);
+                showModal('Error de Escritura Serial', `Hubo un error al enviar datos a Arduino: ${error.message}`);
+            } finally {
+                writer.releaseLock();
+            }
+        }
+
+        // --- Funciones de Lógica del Juego ---
+        /**
+         * Parsea el contenido de un archivo de texto para extraer preguntas y respuestas.
+         * El formato esperado es:
+         * QUESTION:Tu pregunta aquí
+         * ANSWER:Respuesta 1:Puntos1
+         * ANSWER:Respuesta 2:Puntos2
+         * ---
+         * QUESTION:Otra pregunta
+         * ...
+         * @param {string} fileContent - El contenido del archivo de texto.
+         * @returns {Array<Object>} Un array de objetos de preguntas.
+         */
+        function parseQuestionsFile(fileContent) {
+            const questions = [];
+            // Divide el contenido por "---" para obtener bloques de preguntas
+            const blocks = fileContent.split('---').map(block => block.trim()).filter(block => block.length > 0);
+
+            blocks.forEach(block => {
+                const lines = block.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                let questionText = '';
+                const answers = [];
+
+                lines.forEach(line => {
+                    if (line.startsWith('QUESTION:')) {
+                        questionText = line.substring('QUESTION:'.length).trim();
+                    } else if (line.startsWith('ANSWER:')) {
+                        const answerPart = line.substring('ANSWER:'.length).trim();
+                        const parts = answerPart.split(':');
+                        if (parts.length === 2) {
+                            answers.push({
+                                text: parts[0].trim(),
+                                points: parseInt(parts[1].trim(), 10)
+                            });
+                        }
+                    }
+                });
+
+                if (questionText && answers.length > 0) {
+                    questions.push({ question: questionText, answers: answers });
+                }
+            });
+            return questions;
+        }
+
+        /**
+         * Inicia el juego después de cargar las preguntas y definir los nombres de los equipos.
+         */
+        function startGame() {
+            if (gameState.questions.length === 0) {
+                showModal('Error', 'No se han cargado preguntas. Por favor, carga un archivo de preguntas.');
+                return;
+            }
+            // Asigna los nombres de los equipos o usa los valores por defecto
+            gameState.team1.name = team1NameInput.value || "Equipo 1";
+            gameState.team2.name = team2NameInput.value || "Equipo 2";
+
+            team1NameDisplay.textContent = gameState.team1.name;
+            team2NameDisplay.textContent = gameState.team2.name;
+
+            resetGame(); // Reinicia puntuaciones y strikes para un nuevo juego
+            startNewRound();
+        }
+
+        /**
+         * Reinicia el estado del juego (puntuaciones, strikes, etc.) para empezar una partida nueva.
+         */
+        function resetGame() {
+            gameState.currentRound = 0;
+            gameState.team1.score = 0;
+            gameState.team1.strikes = 0;
+            gameState.team2.score = 0;
+            gameState.team2.strikes = 0;
+            gameState.currentQuestionIndex = -1;
+            gameState.buzzerWinner = null;
+            gameState.currentRoundScore = 0;
+            updateScoresDisplay();
+            updateStrikesDisplay();
+        }
+
+        /**
+         * Inicia una nueva ronda del juego.
+         */
+        function startNewRound() {
+            if (gameState.currentRound >= 3) { // Si ya se jugaron 3 rondas, termina el juego
+                endGame();
+                return;
+            }
+
+            gameState.currentQuestionIndex++;
+            // Si no quedan más preguntas, reinicia el juego o notifica
+            if (gameState.currentQuestionIndex >= gameState.questions.length) {
+                showModal('Fin de Preguntas', 'Se han acabado todas las preguntas disponibles. Reiniciando el juego.');
+                resetGame();
+                startNewRound(); // Empieza desde la primera pregunta de nuevo
+                return;
+            }
+
+            gameState.currentQuestionData = gameState.questions[gameState.currentQuestionIndex];
+            // Inicializa las respuestas como no reveladas
+            gameState.revealedAnswers = new Array(gameState.currentQuestionData.answers.length).fill(false);
+            gameState.buzzerWinner = null;
+            gameState.team1.buzzedIn = false;
+            gameState.team2.buzzedIn = false;
+            gameState.currentRoundScore = 0; // Reinicia la puntuación de la ronda
+            updateScoresDisplay();
+            updateStrikesDisplay(); // Reinicia los strikes para la nueva ronda
+            showScreen('buzzer'); // Muestra la pantalla del buzzer
+            sendSerialData('LED_OFF_ALL'); // Asegura que todos los LEDs estén apagados
+        }
+
+        /**
+         * Muestra la pregunta actual y prepara las cajas de respuestas ocultas.
+         */
+        function showQuestion() {
+            questionTextDisplay.textContent = gameState.currentQuestionData.question;
+            answersGrid.innerHTML = ''; // Limpia las respuestas anteriores
+            gameState.currentQuestionData.answers.forEach((answer, index) => {
+                const answerBox = document.createElement('div');
+                answerBox.classList.add('answer-box');
+                answerBox.dataset.index = index; // Para destapar con los botones
+                answerBox.innerHTML = `
+                    <span class="answer-text">???</span>
+                    <span class="answer-points">${answer.points}</span>
+                `;
+                answersGrid.appendChild(answerBox);
+            });
+            showScreen('question'); // Muestra la pantalla de preguntas
+            updateScoresDisplay();
+            updateStrikesDisplay();
+        }
+
+        /**
+         * Destapa una respuesta específica en la pantalla.
+         * @param {number} index - El índice de la respuesta a destapar.
+         */
+        function uncoverAnswer(index) {
+            // Valida el índice y si la respuesta ya está revelada
+            if (index < 0 || index >= gameState.currentQuestionData.answers.length || gameState.revealedAnswers[index]) {
+                return;
+            }
+
+            const answerBox = answersGrid.querySelector(`.answer-box[data-index="${index}"]`);
+            if (answerBox) {
+                answerBox.classList.add('revealed');
+                answerBox.querySelector('.answer-text').textContent = gameState.currentQuestionData.answers[index].text;
+                gameState.revealedAnswers[index] = true;
+                gameState.currentRoundScore += gameState.currentQuestionData.answers[index].points; // Suma los puntos
+                currentRoundScoreDisplay.textContent = gameState.currentRoundScore; // Actualiza la visualización
+            }
+        }
+
+        /**
+         * Añade un strike a un equipo. Si un equipo llega a 3 strikes, la ronda termina.
+         * @param {string} team - El equipo al que añadir el strike ('team1' o 'team2').
+         */
+        function addStrike(team) {
+            if (!team) {
+                showModal('Advertencia', 'No hay un equipo activo para añadir un strike.');
+                return;
+            }
+
+            if (team === 'team1') {
+                gameState.team1.strikes++;
+            } else if (team === 'team2') {
+                gameState.team2.strikes++;
+            }
+            updateStrikesDisplay();
+
+            // Si un equipo llega a 3 strikes
+            if (gameState.team1.strikes >= 3 || gameState.team2.strikes >= 3) {
+                let winningTeam = null;
+                if (gameState.team1.strikes >= 3) {
+                    winningTeam = 'team2'; // Equipo 2 gana los puntos acumulados
+                } else if (gameState.team2.strikes >= 3) {
+                    winningTeam = 'team1'; // Equipo 1 gana los puntos acumulados
+                }
+
+                if (winningTeam) {
+                    gameState[winningTeam].score += gameState.currentRoundScore;
+                    updateScoresDisplay();
+                    showModal('¡3 Strikes!', `${gameState[winningTeam].name} gana los puntos de esta ronda.`);
+                    setTimeout(endRound, 2000); // Termina la ronda después de un breve mensaje
+                }
+            }
+        }
+
+        /**
+         * Actualiza la visualización de las puntuaciones totales de los equipos.
+         */
+        function updateScoresDisplay() {
+            team1ScoreDisplay.textContent = gameState.team1.score;
+            team2ScoreDisplay.textContent = gameState.team2.score;
+        }
+
+        /**
+         * Actualiza la visualización de los strikes para ambos equipos.
+         */
+        function updateStrikesDisplay() {
+            const updateTeamStrikes = (container, strikes) => {
+                Array.from(container.children).forEach((x, i) => {
+                    x.classList.toggle('active', i < strikes);
+                });
+            };
+            updateTeamStrikes(team1StrikesContainer, gameState.team1.strikes);
+            updateTeamStrikes(team2StrikesContainer, gameState.team2.strikes);
+        }
+
+        /**
+         * Maneja los comandos recibidos del Arduino (presiones de botón).
+         * @param {string} command - El comando recibido del Arduino (ej. "BTN1_PRESS").
+         */
+        function handleArduinoInput(command) {
+            const action = buttonMap[command]?.action;
+            const ledCommand = buttonMap[command]?.led;
+
+            // Enciende el LED correspondiente si hay un comando LED asociado
+            if (ledCommand) {
+                sendSerialData(ledCommand);
+                setTimeout(() => sendSerialData('LED_OFF_ALL'), 1000); // Apaga el LED después de 1 segundo
+            }
+
+            if (screens.buzzer.classList.contains('active')) {
+                // Lógica para la ronda de buzzer
+                if (action === 'buzzer1_uncover1' && !gameState.team1.buzzedIn && !gameState.team2.buzzedIn) {
+                    gameState.buzzerWinner = 'team1';
+                    gameState.team1.buzzedIn = true;
+                    showModal('¡Buzzer!', `${gameState.team1.name} ha presionado primero.`);
+                    setTimeout(showQuestion, 3000); // Espera 3 segundos y muestra la pregunta
+                } else if (action === 'buzzer2_uncover2' && !gameState.team1.buzzedIn && !gameState.team2.buzzedIn) {
+                    gameState.buzzerWinner = 'team2';
+                    gameState.team2.buzzedIn = true;
+                    showModal('¡Buzzer!', `${gameState.team2.name} ha presionado primero.`);
+                    setTimeout(showQuestion, 3000); // Espera 3 segundos y muestra la pregunta
+                }
+            } else if (screens.question.classList.contains('active')) {
+                // Lógica para la ronda de preguntas
+                if (action && action.startsWith('uncover')) {
+                    const answerIndex = parseInt(action.replace('uncover', ''), 10) - 1; // Ej. 'uncover3' -> índice 2
+                    uncoverAnswer(answerIndex);
+                }
+                // La lógica de 'strike' ahora se maneja con la rueda del ratón
+            }
+        }
+
+        /**
+         * Añade puntos al equipo correspondiente según el clic del ratón.
+         * @param {MouseEvent} event - El evento del clic del ratón.
+         */
+        function addPointsOnClick(event) {
+            // Solo permite puntuación si se está en la pantalla de preguntas
+            if (!screens.question.classList.contains('active')) return;
+
+            // 0 = clic izquierdo (Equipo 1), 2 = clic derecho (Equipo 2)
+            const teamToScore = event.button === 0 ? 'team1' : (event.button === 2 ? 'team2' : null);
+            if (teamToScore) {
+                gameState[teamToScore].score += gameState.currentRoundScore;
+                updateScoresDisplay();
+                showModal('Puntos Añadidos', `${gameState[teamToScore].name} ha recibido ${gameState.currentRoundScore} puntos.`);
+                setTimeout(endRound, 5000); // Espera 5 segundos y termina la ronda
+            }
+        }
+
+        /**
+         * Termina la ronda actual, muestra las respuestas correctas y prepara la siguiente.
+         */
+        function endRound() {
+            roundNumberDisplay.textContent = gameState.currentRound + 1;
+            revealedAnswersSummary.innerHTML = ''; // Limpia las respuestas anteriores
+            // Muestra todas las respuestas de la pregunta actual
+            gameState.currentQuestionData.answers.forEach((answer, index) => {
+                const answerBox = document.createElement('div');
+                answerBox.classList.add('answer-box', 'revealed'); // Siempre revelada aquí
+                answerBox.innerHTML = `
+                    <span class="answer-text">${answer.text}</span>
+                    <span class="answer-points">${answer.points}</span>
+                `;
+                revealedAnswersSummary.appendChild(answerBox);
+            });
+            showScreen('nextRound'); // Muestra la pantalla de siguiente ronda
+            gameState.currentRound++; // Incrementa la ronda para la siguiente visualización
+        }
+
+        /**
+         * Termina el juego, determina el ganador y muestra las puntuaciones finales.
+         */
+        function endGame() {
+            let winner = null;
+            if (gameState.team1.score > gameState.team2.score) {
+                winner = gameState.team1;
+            } else if (gameState.team2.score > gameState.team1.score) {
+                winner = gameState.team2;
+            }
+
+            winnerNameDisplay.textContent = winner ? winner.name : 'Empate';
+            finalTeam1NameDisplay.textContent = gameState.team1.name;
+            finalTeam1ScoreDisplay.textContent = gameState.team1.score;
+            finalTeam2NameDisplay.textContent = gameState.team2.name;
+            finalTeam2ScoreDisplay.textContent = gameState.team2.score;
+
+            showScreen('winner'); // Muestra la pantalla del ganador
+        }
+
+        // --- Event Listeners ---
+        connectArduinoBtn.addEventListener('click', connectArduino);
+
+        questionsFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        gameState.questions = parseQuestionsFile(e.target.result);
+                        fileStatus.textContent = `Archivo "${file.name}" cargado con ${gameState.questions.length} preguntas.`;
+                        fileStatus.classList.remove('text-gray-400', 'text-red-400');
+                        fileStatus.classList.add('text-green-400');
+                        // Si Arduino ya está conectado, pasa a la pantalla de nombres de equipos
+                        if (port && port.readable) {
+                            showScreen('teamNames');
+                        }
+                    } catch (error) {
+                        console.error('Error al parsear el archivo:', error);
+                        fileStatus.textContent = `Error al cargar archivo: ${error.message}`;
+                        fileStatus.classList.remove('text-gray-400', 'text-green-400');
+                        fileStatus.classList.add('text-red-400');
+                        showModal('Error de Archivo', `No se pudo leer el archivo de preguntas. Asegúrate de que el formato sea correcto. Error: ${error.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                fileStatus.textContent = 'Ningún archivo seleccionado.';
+                fileStatus.classList.remove('text-green-400', 'text-red-400');
+                fileStatus.classList.add('text-gray-400');
+            }
+        });
+
+        // Simula un clic en el input de archivo al hacer clic en el botón "Cargar Preguntas"
+        loadFileBtn.addEventListener('click', () => {
+            questionsFileInput.click();
+        });
+
+        startGameBtn.addEventListener('click', startGame);
+
+        continueGameBtn.addEventListener('click', startNewRound);
+
+        playAgainBtn.addEventListener('click', () => {
+            showScreen('connect'); // Vuelve a la pantalla de conexión para empezar de nuevo
+            // Limpia el estado del juego y los elementos de la UI
+            gameState.questions = [];
+            questionsFileInput.value = ''; // Limpia el input de archivo
+            fileStatus.textContent = '';
+            team1NameInput.value = '';
+            team2NameInput.value = '';
+            connectionStatus.textContent = '';
+            sendSerialData('LED_OFF_ALL'); // Asegura que los LEDs estén apagados
+            // No cierra el puerto serial automáticamente, el usuario puede reconectar si es necesario
+        });
+
+        // Event listener para clics del ratón para puntuación (izquierdo para Equipo 1, derecho para Equipo 2)
+        document.addEventListener('mousedown', (event) => {
+            // Previene el menú contextual del navegador al hacer clic derecho
+            if (event.button === 2) {
+                event.preventDefault();
+            }
+            addPointsOnClick(event);
+        });
+
+        // Event listener para la rueda del ratón (scroll) para añadir strikes
+        document.addEventListener('wheel', (event) => {
+            // Solo añadir strikes si estamos en la pantalla de preguntas y hay un ganador del buzzer
+            if (screens.question.classList.contains('active') && gameState.buzzerWinner) {
+                addStrike(gameState.buzzerWinner);
+            }
+        });
+
+        // Configuración inicial de la pantalla al cargar la página
+        showScreen('connect');
+    </script>
+</body>
+</html>
