@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarjeta de Presentación - Dr. Hernán Martínez Campirano</title>
+    <!-- Importar la fuente Inter de Google Fonts para un estilo limpio y moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Importar Tailwind CSS para un diseño responsivo y rápido -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos generales del cuerpo para centrar el contenido y un fondo suave */
+        body {
+            font-family: 'Inter', sans-serif; /* Usar la fuente Inter */
+            background-color: #f0f2f5; /* Color de fondo gris claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Altura mínima del 100% del viewport */
+            margin: 0;
+            padding: 20px; /* Espaciado alrededor de la tarjeta */
+            box-sizing: border-box; /* Incluir padding en el tamaño total */
+            padding-bottom: 80px; /* Espacio en blanco al final de la página */
+        }
+        /* Contenedor principal de la tarjeta de presentación */
+        .card-container {
+            background-color: #ffffff; /* Fondo blanco para la tarjeta */
+            border-radius: 24px; /* Esquinas muy redondeadas, estilo Apple */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave y profunda */
+            padding: 32px; /* Espaciado interno */
+            max-width: 420px; /* Ancho máximo para la tarjeta */
+            width: 100%; /* Ocupar todo el ancho disponible */
+            text-align: center; /* Centrar el texto */
+            display: flex;
+            flex-direction: column;
+            gap: 24px; /* Espacio entre secciones */
+        }
+        /* Estilos para el logo superior */
+        .header-logo {
+            width: 80px; /* Tamaño del logo */
+            height: auto;
+            margin: 0 auto 16px; /* Centrar y añadir margen inferior */
+            display: block; /* Asegurar que ocupe su propia línea */
+        }
+        /* Estilos para el nombre del doctor */
+        .name {
+            font-size: 2.2rem; /* Tamaño de fuente grande */
+            font-weight: 700; /* Negrita */
+            color: #1a1a1a; /* Color de texto oscuro */
+            margin-bottom: 4px; /* Espaciado inferior */
+        }
+        /* Estilos para el título/especialidad */
+        .title {
+            font-size: 1.25rem; /* Tamaño de fuente ligeramente grande */
+            font-weight: 500; /* Peso de fuente medio */
+            color: #666; /* Color de texto gris */
+            margin-bottom: 24px; /* Espaciado inferior */
+        }
+        /* Contenedor para la información de contacto y ubicaciones */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px; /* Espaciado entre cada elemento */
+            text-align: left; /* Alinear texto a la izquierda */
+        }
+        /* Estilos para cada elemento de contacto (celular, whatsapp) */
+        .contact-item {
+            display: flex;
+            align-items: center; /* Alinear íconos y texto verticalmente */
+            gap: 12px; /* Espacio entre ícono y texto */
+            font-size: 1.1rem;
+            color: #333; /* Color de texto oscuro */
+            background-color: #f9f9f9; /* Fondo suave para los items */
+            padding: 12px 16px;
+            border-radius: 12px; /* Esquinas redondeadas */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Sombra ligera */
+            transition: background-color 0.2s ease-in-out; /* Transición suave para hover */
+        }
+        .contact-item:hover {
+            background-color: #f0f0f0; /* Ligero cambio de color al pasar el ratón */
+        }
+        .contact-item a {
+            color: #333; /* Color del enlace */
+            text-decoration: none; /* Sin subrayado */
+            transition: color 0.2s ease-in-out; /* Transición suave al pasar el ratón */
+            display: flex; /* Asegura que el enlace ocupe el espacio para el clic */
+            align-items: center; /* Centra el texto dentro del enlace */
+            flex-grow: 1; /* Permite que el enlace ocupe el espacio restante */
+            justify-content: flex-end; /* Alinea el número a la derecha */
+        }
+        .contact-item a:hover {
+            color: #007aff; /* Cambiar a azul Apple al pasar el ratón */
+        }
+        /* Estilos para los íconos de contacto (SVG) */
+        .contact-icon {
+            color: #888; /* Color gris para los íconos */
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0; /* Prevenir que el ícono se encoja */
+        }
+        /* Estilos para las secciones de clínica/consultorio */
+        .location-item {
+            background-color: #f9f9f9; /* Fondo suave */
+            padding: 16px;
+            border-radius: 12px; /* Esquinas redondeadas */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Sombra ligera */
+            margin-top: 8px; /* Espacio superior */
+            cursor: pointer; /* Cursor de puntero para indicar que es clickeable */
+            transition: background-color 0.2s ease-in-out; /* Transición suave para hover */
+        }
+        .location-item:hover {
+            background-color: #f0f0f0; /* Ligero cambio de color al pasar el ratón */
+        }
+        .location-item .clinic-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .location-item address {
+            font-style: normal; /* Quitar cursiva predeterminada de address */
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Estilos para el botón "Agregar Contacto" */
+        .add-contact-btn {
+            background-color: #007aff; /* Azul Apple */
+            color: #ffffff; /* Texto blanco */
+            padding: 14px 24px;
+            border-radius: 16px; /* Botón redondeado */
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none; /* Sin borde */
+            cursor: pointer; /* Cursor de mano */
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out; /* Transiciones suaves */
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); /* Sombra para el botón */
+            width: calc(100% - 40px); /* Ajustar el ancho para tener padding */
+            margin: 0 20px 20px; /* Centrar con margen, añadir margen inferior */
+        }
+        .add-contact-btn:hover {
+            background-color: #005bb5; /* Azul más oscuro al pasar el ratón */
+            transform: translateY(-2px); /* Efecto de elevación */
+        }
+        .add-contact-btn:active {
+            transform: translateY(0); /* Quitar elevación al hacer clic */
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4); /* Sombra más pequeña al hacer clic */
+        }
+
+        /* Ajustes responsivos para pantallas más pequeñas */
+        @media (max-width: 600px) {
+            .card-container {
+                padding: 24px; /* Reducir padding en móviles */
+                border-radius: 16px; /* Reducir redondez */
+                margin: 10px; /* Margen más pequeño en pantallas pequeñas */
+            }
+            .name {
+                font-size: 1.8rem; /* Reducir tamaño de fuente del nombre */
+            }
+            .title {
+                font-size: 1.1rem; /* Reducir tamaño de fuente del título */
+            }
+            .header-logo {
+                width: 70px; /* Reducir tamaño del logo */
+            }
+            .add-contact-btn {
+                font-size: 1rem;
+                padding: 12px 20px; /* Reducir padding del botón */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <!-- Logo superior (simulando el logo del colegio médico) -->
+        <!-- Se usa una imagen de placeholder. Si tienes la URL del logo real, reemplázala aquí. -->
+        <img src="https://placehold.co/80x80/dcdcdc/666666?text=LOGO" alt="Logo Colegio Médico" class="header-logo">
+
+        <!-- Sección de Nombre y Especialidad -->
+        <div>
+            <h1 class="name">Dr. Hernán Martínez Campirano</h1>
+            <p class="title">Medicina General y Urgencias</p>
+        </div>
+
+        <!-- Sección de Información de Contacto (Celular y Whatsapp) -->
+        <div class="info-section">
+            <div class="contact-item">
+                <!-- Icono de Celular (SVG inline) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="contact-icon"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+                <span>Celular</span>
+                <!-- Al hacer clic, se abre la aplicación de teléfono para llamar -->
+                <a href="tel:+524441308978">4441308978</a>
+            </div>
+            <div class="contact-item">
+                <!-- Icono de Whatsapp (SVG inline) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="contact-icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6.06-6.06A19.79 19.79 0 0 1 2 4.18 2 2 0 0 1 4.18 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>Whatsapp</span>
+                <!-- Al hacer clic, se abre WhatsApp -->
+                <a href="https://wa.me/524441308978" target="_blank" rel="noopener noreferrer">4441308978</a>
+            </div>
+        </div>
+
+        <!-- Sección de Ubicaciones -->
+        <div class="info-section">
+            <!-- Clínica Perpetuo Socorro -->
+            <div class="location-item" onclick="window.open('https://www.google.com/maps/search/?api=1&query=Av.+Dami%C3%A1n+Carmona+1280%2C+Barrio+de+Santiago%2C+78000+San+Luis+Potos%C3%AD%2C+S.L.P.', '_blank');">
+                <p class="clinic-name">
+                    <!-- Icono de Ubicación (SVG inline) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Clínica Perpetuo Socorro
+                </p>
+                <address>
+                    Av. Damián Carmona 1280, Barrio de Santiago,<br>
+                    78000 San Luis Potosí, S.L.P.
+                </address>
+            </div>
+            <!-- Consultorio Cordillera de los Alpes -->
+            <div class="location-item" onclick="window.open('https://www.google.com/maps/search/?api=1&query=Cordillera+de+los+Alpes+721-2%2C+Loma+Verde%2C+78215+San+Luis+Potos%C3%AD%2C+S.L.P.', '_blank');">
+                <p class="clinic-name">
+                    <!-- Icono de Ubicación (SVG inline) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Consultorio Cordillera de los Alpes
+                </p>
+                <address>
+                    Cordillera de los Alpes 721-2, Loma Verde,<br>
+                    78215 San Luis Potosí, S.L.P.
+                </address>
+            </div>
+        </div>
+
+        <!-- Botón para Agregar Contacto -->
+        <button id="addContactBtn" class="add-contact-btn">Agregar Contacto</button>
+    </div>
+
+    <script>
+        // Obtener el botón por su ID
+        document.getElementById('addContactBtn').addEventListener('click', function() {
+            // Datos del contacto del Dr. Hernán Martínez Campirano
+            const name = "Hernán Martínez Campirano";
+            const prefix = "Dr.";
+            const title = "Medicina General y Urgencias";
+            const phoneNumber = "4441308978"; // Un solo número para la vCard
+
+            const clinic1Name = "Clínica Perpetuo Socorro";
+            const clinic1Address = "Av. Damián Carmona 1280, Barrio de Santiago, 78000 San Luis Potosí, S.L.P.";
+            const clinic2Name = "Consultorio Cordillera de los Alpes";
+            const clinic2Address = "Cordillera de los Alpes 721-2, Loma Verde, 78215 San Luis Potosí, S.L.P.";
+
+            // Crear el contenido de la vCard (formato estándar para contactos)
+            // Se incluye un solo número de teléfono y las direcciones como notas.
+            const vCard = `BEGIN:VCARD
+VERSION:3.0
+N:${name.split(' ')[2]};${name.split(' ')[1]};${prefix};;;
+FN:${prefix} ${name}
+TITLE:${title}
+TEL;TYPE=CELL:${phoneNumber}
+NOTE:Clínica Perpetuo Socorro: ${clinic1Address}\\nConsultorio Cordillera de los Alpes: ${clinic2Address}
+END:VCARD`;
+
+            // Crear un Blob (objeto de datos binarios) a partir del contenido de la vCard
+            const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+
+            // Crear una URL temporal para el Blob
+            const url = URL.createObjectURL(blob);
+
+            // Crear un elemento de enlace temporal (<a>)
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Dr_Hernan_Martinez_Campirano.vcf'; // Nombre del archivo a descargar
+
+            // Añadir el enlace al cuerpo del documento y hacer clic programáticamente
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpiar: remover el enlace y liberar la URL temporal
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
